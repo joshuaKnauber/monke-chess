@@ -1,6 +1,6 @@
 import styles from '../../styles/Home.module.css'
 import { db } from '../../firebase/initFirebase'
-import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import Board from '../../components/Board'
 
@@ -57,7 +57,7 @@ export default function Room(props) {
 
   const onRoomUpdate = (data) => {
     if (data.history.length) {
-      setGameState(data.history[0])
+      setGameState(data.history[data.history.length-1])
     }
     if (data.white) {
       setPlayerWhite(data.white)
@@ -95,9 +95,17 @@ export default function Room(props) {
     }
   }
 
-  const updateGameState = (newGameState) => {
-    console.log(newGameState)
-    setGameState(newGameState)
+  const updateGameState = async (newGameState) => {
+    // setGameState(newGameState)
+    try {
+      const roomRef = doc(db, "rooms", id);
+      const update = {}
+      update.history = [...data.history, newGameState]
+      await updateDoc(roomRef, update);
+    } catch (e) {
+      console.error("Error updating document: ", e);
+      throw e
+    }
   }
 
   useEffect(() => {
@@ -122,8 +130,9 @@ export default function Room(props) {
 
   return (
     <div className={styles.container}>
-      {roomId}<br/>
-      {isPlayerWhite ? "white" : "black"} {playerName}<br/>
+      room id {roomId}<br/>
+      you are playing {isPlayerWhite ? "white" : "black"} {playerName}<br/>
+      {gameState.whitesTurn ? "white" : "black"} has next move
       <Board
         isPlayerWhite={isPlayerWhite}
         gameState={gameState}

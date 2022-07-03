@@ -18,7 +18,7 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
     const canMoveHere = moves.find(move => move[0] === toX && move[1] === toY) ? true : false
     if (canMoveHere) {
       const newGameState = JSON.parse(JSON.stringify(gameState))
-      // newGameState.whitesTurn = !newGameState.whitesTurn
+      newGameState.whitesTurn = !newGameState.whitesTurn
       // create new piece
       let newPiece = getPiece(newGameState, fromX, fromY)
       newPiece.x = toX
@@ -38,7 +38,11 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
 
   const onSelectTile = (tileId) => {
     if (canMove && selectedTileId && selectedTileId !== tileId) {
-      tryMove(selectedTileId, tileId)
+      const [fromX, fromY] = selectedTileId.split("-").map(Number)
+      let piece = getPiece(gameState, fromX, fromY)
+      if (piece && piece.white === isPlayerWhite) {
+        tryMove(selectedTileId, tileId)
+      }
     }
     setPossibleMoves(getMoves(gameState, tileId))
     setSelectedTileId(tileId)
@@ -95,7 +99,7 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
             <Tile
               key={index}
               x={index % 8}
-              y={(isPlayerWhite ? 7 : 0)-Math.floor(index/8)}
+              y={isPlayerWhite ? 7 - Math.floor(index/8) : Math.floor(index/8)}
               possibleMoves={possibleMoves}
               canMove={canMove}
               selectedId={selectedTileId}

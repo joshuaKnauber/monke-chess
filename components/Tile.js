@@ -47,7 +47,7 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
 
   useEffect(() => {
     const newPiece = getPiece(gameState, x, y)
-    console.log("updated state")
+    console.log(x, y, newPiece)
     if (newPiece) {
       setPiece(newPiece)
     } else {
