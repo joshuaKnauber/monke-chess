@@ -4,6 +4,46 @@ import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc }
 import { useEffect, useState } from 'react'
 import Board from '../../components/Board'
 
+const NEW_GAME = {
+  whitesTurn: true,
+
+  board: [
+    { x: 0, y: 0, type: 'rook', white: true },
+    { x: 1, y: 0, type: 'monkey', white: true },
+    { x: 2, y: 0, type: 'fish', white: true },
+    { x: 3, y: 0, type: 'queen', white: true },
+    { x: 4, y: 0, type: 'king', white: true },
+    { x: 5, y: 0, type: 'fish', white: true },
+    { x: 6, y: 0, type: 'monkey', white: true },
+    { x: 7, y: 0, type: 'rook', white: true },
+    { x: 0, y: 1, type: 'fish', white: true },
+    { x: 1, y: 1, type: 'fish', white: true },
+    { x: 2, y: 1, type: 'elephant', white: true },
+    { x: 3, y: 1, type: 'fish', white: true },
+    { x: 4, y: 1, type: 'fish', white: true },
+    { x: 5, y: 1, type: 'elephant', white: true },
+    { x: 6, y: 1, type: 'fish', white: true },
+    { x: 7, y: 1, type: 'fish', white: true },
+
+    { x: 0, y: 7, type: 'rook', white: false },
+    { x: 1, y: 7, type: 'monkey', white: false },
+    { x: 2, y: 7, type: 'fish', white: false },
+    { x: 3, y: 7, type: 'queen', white: false },
+    { x: 4, y: 7, type: 'king', white: false },
+    { x: 5, y: 7, type: 'fish', white: false },
+    { x: 6, y: 7, type: 'monkey', white: false },
+    { x: 7, y: 7, type: 'rook', white: false },
+    { x: 0, y: 6, type: 'fish', white: false },
+    { x: 1, y: 6, type: 'fish', white: false },
+    { x: 2, y: 6, type: 'elephant', white: false },
+    { x: 3, y: 6, type: 'fish', white: false },
+    { x: 4, y: 6, type: 'fish', white: false },
+    { x: 5, y: 6, type: 'elephant', white: false },
+    { x: 6, y: 6, type: 'fish', white: false },
+    { x: 7, y: 6, type: 'fish', white: false }
+  ]
+}
+
 export default function Room(props) {
 
   const { roomId, data, id } = props
@@ -18,10 +58,6 @@ export default function Room(props) {
   const onRoomUpdate = (data) => {
     if (data.history.length) {
       setGameState(data.history[0])
-    } else {
-      setGameState({
-        whitesTurn: true,
-      })
     }
     if (data.white) {
       setPlayerWhite(data.white)
@@ -59,6 +95,11 @@ export default function Room(props) {
     }
   }
 
+  const updateGameState = (newGameState) => {
+    console.log(newGameState)
+    setGameState(newGameState)
+  }
+
   useEffect(() => {
     // keep track of updates
     const unsub = onSnapshot(
@@ -83,8 +124,10 @@ export default function Room(props) {
     <div className={styles.container}>
       {roomId}<br/>
       {isPlayerWhite ? "white" : "black"} {playerName}<br/>
-      {JSON.stringify(data)}
-      <Board isPlayerWhite={isPlayerWhite} gameState={gameState}/>
+      <Board
+        isPlayerWhite={isPlayerWhite}
+        gameState={gameState}
+        updateGameState={updateGameState}/>
     </div>
   )
 }
@@ -108,7 +151,7 @@ export async function getServerSideProps(context) {
     else {
       data = {
         id: roomId,
-        history: [],
+        history: [NEW_GAME],
         black: "",
         white: "",
       }

@@ -38,6 +38,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  color: black;
 }
 
 .tile.black {
@@ -49,7 +51,47 @@
   width: 100% !important;
 }
 
-.tile img {
-  width: 60%;
-  height: 60%;
+.tile.selected {
+  outline: 3px solid red;
+  outline-style: inset;
+  outline-offset: -3px;
+}
+
+.tile.possibleMove::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+}
+
+.piece {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.piece img {
+  width: 80%;
+  height: 80%;
+  user-select: none;
+}
+.piece p {
+  margin: 0px;
+  color: white !important;
+  background-color: black;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.draggingPiece {
+  position: absolute;
+  transform: translateX(-50%) translateY(-50%);
 }
