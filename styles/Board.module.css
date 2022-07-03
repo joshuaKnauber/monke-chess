@@ -1,0 +1,55 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boardContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0rem;
+}
+
+@media (min-width: 768px) {
+  .boardContainer {
+    max-width: 800px;
+  }
+}
+
+.jailContainer {
+  width: 10%;
+}
+
+.board {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 80%;
+}
+
+.tile {
+  background-color: white;
+  width: calc(100% / 8);
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tile.black {
+  background-color: rgb(33, 68, 110);
+  color: white;
+}
+
+.tile.jail {
+  width: 100% !important;
+}
+
+.tile img {
+  width: 60%;
+  height: 60%;
+}
