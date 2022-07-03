@@ -55,6 +55,8 @@ export default function Room(props) {
   const [playerBlack, setPlayerBlack] = useState(null)
   const [isPlayerWhite, setIsPlayerWhite] = useState(null)
 
+  const [copiedLink, setCopiedLink] = useState(false)
+
   const onRoomUpdate = (data) => {
     if (data.history.length) {
       setGameState(data.history[data.history.length-1])
@@ -107,6 +109,20 @@ export default function Room(props) {
     }
   }
 
+  const copyRoomLink = () => {
+    const link = window.location.href
+    const textArea = document.createElement("textarea")
+    textArea.value = link
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand("copy")
+    textArea.remove()
+    setCopiedLink(true)
+    setTimeout(() => {
+      setCopiedLink(false)
+    }, 500);
+  }
+
   useEffect(() => {
     // keep track of updates
     const unsub = onSnapshot(
@@ -129,7 +145,10 @@ export default function Room(props) {
 
   return (
     <div className={styles.container}>
-      <h1>Room: {roomId}</h1>
+      <div style={{ display: "flex", flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+        <h1>Room: {roomId}</h1>
+        <button style={{ height: 30 }} onClick={copyRoomLink}>{copiedLink ? "Copied" : "Copy Link"}</button>
+      </div>
       you are playing {isPlayerWhite ? "white" : "black"} {playerName}<br/>
       {gameState.whitesTurn ? "white" : "black"} has next move
       <Board
