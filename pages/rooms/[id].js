@@ -96,7 +96,6 @@ export default function Room(props) {
   }
 
   const updateGameState = async (newGameState) => {
-    // setGameState(newGameState)
     try {
       const roomRef = doc(db, "rooms", id);
       const update = {}
@@ -130,7 +129,7 @@ export default function Room(props) {
 
   return (
     <div className={styles.container}>
-      room id {roomId}<br/>
+      <h1>Room: {roomId}</h1>
       you are playing {isPlayerWhite ? "white" : "black"} {playerName}<br/>
       {gameState.whitesTurn ? "white" : "black"} has next move
       <Board

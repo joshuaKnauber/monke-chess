@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import styles from '../styles/Board.module.css'
 import { getPiece } from './utils/helpers'
+
+import { images } from '../components/utils/importImages'
 
 export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTile, selectedId }) {
 
@@ -8,10 +11,13 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
   const [mousePos, setMousePos] = useState([0, 0])
   const [size, setSize] = useState(0)
 
+  const [selectedPiece, setSelectedPiece] = useState(null)
   const [piece, setPiece] = useState(null)
 
   const tileId = `${x}-${y}`
   const isPossibleMove = possibleMoves.find(move => move[0] === x && move[1] === y) ? true : false
+
+  const isPlayerWhite = canMove === gameState.whitesTurn
 
   const tileMouseUp = (e) => {
     selectTile(tileId)
@@ -47,7 +53,6 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
 
   useEffect(() => {
     const newPiece = getPiece(gameState, x, y)
-    console.log(x, y, newPiece)
     if (newPiece) {
       setPiece(newPiece)
     } else {
@@ -55,11 +60,26 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
     }
   }, [gameState])
 
-  let imgStyle = {}
-  if (dragging) { imgStyle = {
-    left: mousePos[0], top: mousePos[1],
-    width: size * 1.25, height: size * 1.25,
-  } }
+  useEffect(() => {
+    if (selectedId) {
+      const [selectedX, selectedY] = selectedId.split("-").map(Number)
+      const newPiece = getPiece(gameState, selectedX, selectedY)
+      if (newPiece) {
+        setSelectedPiece(newPiece)
+      } else {
+        setSelectedPiece(null)
+      }
+    } else {
+      setSelectedPiece(null)
+    }
+  }, [selectedId])
+
+  const isTileBlack = (x + y) % 2
+  const isTileJail = x < 0 || x > 7
+  const isTileSelected = selectedId === tileId && piece && piece.white === isPlayerWhite
+  const selectedIsOwn = selectedPiece && selectedPiece.white === isPlayerWhite
+  const isTilePossibleTarget = selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
+  const isTilePossibleMove = selectedIsOwn && isPossibleMove && !isTilePossibleTarget
 
   return (
     <div onMouseUp={tileMouseUp}
@@ -67,23 +87,24 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
       onDragOver={(e) => { e.preventDefault() }}
       className={`
         ${styles.tile}
-        ${(x + y) % 2 && styles.black}
-        ${(x < 0 || x > 7) && styles.jail}
-        ${(selectedId === tileId) && styles.selected}
-        ${isPossibleMove && styles.possibleMove}
+        ${isTileBlack && styles.black}
+        ${isTileJail && styles.jail}
+        ${isTileSelected && styles.highlighted}
+        ${isTilePossibleTarget && styles.highlighted}
+        ${isTilePossibleMove && styles.possibleMove}
       `}>
-      {piece &&
-        <div className={`${styles.piece} ${dragging ? styles.draggingPiece : ''}`}
-          style={imgStyle}
-          draggable={canMove}
-          onDragStart={onDragStart}
-          onDrag={onDrag}
-          onDragEnd={onDragEnd}
-        >
-          <p style={{ filter: piece.white ? "invert(1)" : "unset" }}>
-            {piece.type}
-          </p>
-        </div>}
+      <div className={`${styles.piece} ${dragging ? styles.draggingPiece : ''}`}
+        style={{ cursor: (piece?.white === isPlayerWhite || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
+        draggable={canMove}
+        onDragStart={onDragStart}
+        onDrag={onDrag}
+        onDragEnd={onDragEnd}
+      >
+        {piece && <Image
+          src={images[`${piece.type}-${piece.white ? 'white' : 'black'}`]}
+          alt="Picture of the author"
+        />}
+      </div>
     </div>
   );
 }
