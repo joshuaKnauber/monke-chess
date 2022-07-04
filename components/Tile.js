@@ -56,7 +56,7 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
       pieceImg = "bear"
     } else {
       let addon = piece.type === "fish" && piece.isQueen ? "-queen" : ""
-      addon = piece.type === "king" && piece.hasBanana ? "-banana" : ""
+      addon = piece.type === "king" && piece.hasBanana ? "-banana" : addon
       pieceImg = `${piece.type}${addon}-${piece.white ? 'white' : 'black'}`
     }
   }

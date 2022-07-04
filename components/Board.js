@@ -30,7 +30,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
       if (newPiece.type === "bear") { newPiece.isDeployed = true }
       // fish queen
       if (newPiece.type == "fish") {
-        if (newPiece.white && newPiece.y === 7 || !newPiece.white && newPiece.y === 0) {
+        if ((newPiece.white && newPiece.y === 7) || (!newPiece.white && newPiece.y === 0)) {
           newPiece.isQueen = true
         }
       }
