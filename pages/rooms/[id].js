@@ -1,5 +1,8 @@
 import styles from '../../styles/Game.module.css'
 import { db } from '../../firebase/initFirebase'
+import Head from 'next/head'
+import { useWindowSize } from 'react-use';
+import Confetti from 'react-confetti'
 import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Board from '../../components/Board'
@@ -47,6 +50,8 @@ const NEW_GAME = {
 }
 
 export default function Room(props) {
+
+  const {width, height} = useWindowSize();
 
   const { roomId, data, id } = props
 
@@ -158,6 +163,9 @@ export default function Room(props) {
 
   if (isPlayerWhite === null) {
     return <>
+      <Head>
+        <title>{roomId}</title>
+      </Head>
       <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Name"></input>
       <button disabled={playerName === "" && playerWhite === null} onClick={() => pickPlayer(true)}>white{playerWhite ? `: ${playerWhite}` : ""}</button>
       <button disabled={playerName === "" && playerBlack === null} onClick={() => pickPlayer(false)}>black{playerBlack ? `: ${playerBlack}` : ""}</button>
@@ -166,24 +174,29 @@ export default function Room(props) {
   }
 
   return (
-    <div className={styles.container}>
-      <div style={{ display: "flex", flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-        <h1>Room: {roomId}</h1>
-        <button style={{ height: 30 }} onClick={copyRoomLink}>{copiedLink ? "Copied" : "Copy Link"}</button>
+    <>
+      <Head>
+        <title>Monke Chess: {roomId}</title>
+      </Head>
+      {/* <Confetti width={width} height={height}/> */}
+      <div className={styles.container}>
+        <div style={{ display: "flex", flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+          <h1>Room: {roomId}</h1>
+          <button style={{ height: 30 }} onClick={copyRoomLink}>{copiedLink ? "Copied" : "Copy Link"}</button>
+        </div>
+        {playerWhite !== playerBlack && <><button onClick={switchPlayer}>switch player</button><br/></>}
+        you are playing {playerBlack === playerWhite ? "both players" : isPlayerWhite ? "white" : "black"}<br/>
+        {gameState.whitesTurn ? "white" : "black"} has next move
+        <div className={styles.board} ref={boardRef}>
+          {(!playerBlack || !playerWhite) && <div className={styles.waitingOverlay}>waiting for other player</div>}
+          <Board
+            isPlayerWhite={isPlayerWhite}
+            isBothPlayers={playerWhite === playerBlack}
+            gameState={gameState}
+            updateGameState={updateGameState}/>
+        </div>
       </div>
-      {playerWhite !== playerBlack && <><button onClick={switchPlayer}>switch player</button><br/></>}
-      you are playing {playerBlack === playerWhite ? "both players" : isPlayerWhite ? "white" : "black"}<br/>
-      {gameState.whitesTurn ? "white" : "black"} has next move
-      <div className={styles.board} ref={boardRef}>
-        {(!playerBlack || !playerWhite) && <div className={styles.waitingOverlay}>waiting for other player</div>}
-        <Board
-          key={isPlayerWhite}
-          isPlayerWhite={isPlayerWhite}
-          isBothPlayers={playerWhite === playerBlack}
-          gameState={gameState}
-          updateGameState={updateGameState}/>
-      </div>
-    </div>
+    </>
   )
 }
 
@@ -222,7 +235,7 @@ export async function getServerSideProps(context) {
       },
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return {
       redirect: {
         destination: '/',

@@ -65,6 +65,10 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
   }
 
   useEffect(() => {
+    resetSelectedTile()
+  }, [gameState.whitesTurn])
+
+  useEffect(() => {
     window.addEventListener('mouseup', resetSelectedTile)
     return () => {
       window.removeEventListener("mouseup", resetSelectedTile)
