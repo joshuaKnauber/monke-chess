@@ -69,6 +69,12 @@ export default function Room(props) {
       setPlayerBlack(data.black)
       if (isPlayerWhite === false) { setPlayerName(data.black) }
     }
+    if (data.white && data.black && data.white === data.black) {
+      const isWhitesTurn = data.history[data.history.length-1].whitesTurn
+      setIsPlayerWhite(isWhitesTurn)
+    } else if (localStorage.getItem(id)) {
+      setIsPlayerWhite(localStorage.getItem(id) === 'white')
+    }
   }
 
   const writePickedPlayer = async (color, name) => {
@@ -83,6 +89,16 @@ export default function Room(props) {
     }
   }
 
+  const switchPlayer = () => {
+    setIsPlayerWhite(null)
+    localStorage.removeItem(id)
+  }
+
+  const pickBothPlayers = async () => {
+    await pickPlayer(false)
+    await pickPlayer(true)
+  }
+
   const pickPlayer = async (pickedWhite) => {
     try {
       if ((pickedWhite && playerWhite === null) ||
@@ -90,6 +106,8 @@ export default function Room(props) {
         await writePickedPlayer(pickedWhite ? "white" : "black", playerName)
       }
       setIsPlayerWhite(pickedWhite)
+      setPlayerName(pickedWhite ? data.white : data.black)
+      localStorage.setItem(id, pickedWhite ? "white" : "black")
     } catch (e) {
       console.error("Error updating document: ", e);
       alert("something fucked up when picking player. try again")
@@ -133,15 +151,16 @@ export default function Room(props) {
     }
   }, [])
 
+  if (!gameState) return <></>
+
   if (isPlayerWhite === null) {
     return <>
       <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Name"></input>
       <button disabled={playerName === "" && playerWhite === null} onClick={() => pickPlayer(true)}>white{playerWhite ? `: ${playerWhite}` : ""}</button>
       <button disabled={playerName === "" && playerBlack === null} onClick={() => pickPlayer(false)}>black{playerBlack ? `: ${playerBlack}` : ""}</button>
+      <button disabled={playerName === "" || (playerBlack && playerWhite && playerWhite !== playerBlack)} onClick={() => pickBothPlayers()}>play both</button>
     </>
   }
-
-  if (!gameState) return <></>
 
   return (
     <div className={styles.container}>
@@ -149,9 +168,11 @@ export default function Room(props) {
         <h1>Room: {roomId}</h1>
         <button style={{ height: 30 }} onClick={copyRoomLink}>{copiedLink ? "Copied" : "Copy Link"}</button>
       </div>
-      you are playing {isPlayerWhite ? "white" : "black"} {playerName}<br/>
+      {playerWhite !== playerBlack && <><button onClick={switchPlayer}>switch player</button><br/></>}
+      you are playing {playerBlack === playerWhite ? "both players" : isPlayerWhite ? "white" : "black"}<br/>
       {gameState.whitesTurn ? "white" : "black"} has next move
       <Board
+        key={isPlayerWhite}
         isPlayerWhite={isPlayerWhite}
         gameState={gameState}
         updateGameState={updateGameState}/>

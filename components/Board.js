@@ -95,17 +95,20 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
           />
         </div>
         <div className={styles.board}>
-          {Array.from({ length: 64 }).map((_, index) =>
-            <Tile
-              key={index}
-              x={index % 8}
-              y={isPlayerWhite ? 7 - Math.floor(index/8) : Math.floor(index/8)}
+          {Array.from({ length: 64 }).map((_, index) => {
+            let tileX = index % 8
+            let tileY = isPlayerWhite ? 7 - Math.floor(index/8) : Math.floor(index/8)
+            return <Tile
+              key={`${tileX}-${tileY}`}
+              x={tileX}
+              y={tileY}
               possibleMoves={possibleMoves}
               canMove={canMove}
               selectedId={selectedTileId}
               gameState={gameState}
               selectTile={onSelectTile}
             />
+          }
           )}
         </div>
         <div className={styles.jailContainer}>
