@@ -7,14 +7,10 @@ import { images } from '../components/utils/importImages'
 
 export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTile, selectedId }) {
 
-  const [dragging, setDragging] = useState(false)
-  const [mousePos, setMousePos] = useState([0, 0])
-  const [size, setSize] = useState(0)
-
   const [selectedPiece, setSelectedPiece] = useState(null)
   const [piece, setPiece] = useState(null)
 
-  const tileId = `${x}-${y}`
+  const tileId = `${x};${y}`
   const isPossibleMove = possibleMoves.find(move => move[0] === x && move[1] === y) ? true : false
 
   const isPlayerWhite = canMove === gameState.whitesTurn
@@ -22,33 +18,6 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
   const tileMouseUp = (e) => {
     selectTile(tileId)
     e.stopPropagation()
-  }
-
-  const onDragStart = (e) => {
-    console.log("drag")
-    if (!canMove) return
-    setMousePos([e.clientX, e.clientY])
-    selectTile(tileId)
-    setSize(e.target.clientWidth)
-    setMousePos([e.clientX, e.clientY])
-    setDragging(true)
-    e.dataTransfer.setData("tileId", tileId)
-  }
-
-  const onDrag = (e) => {
-    setMousePos([e.clientX, e.clientY])
-  }
-
-  const onDragEnd = (e) => {
-    setDragging(false)
-  }
-  
-  const onDrop = (e) => {
-    if (!canMove) return
-    // e.preventDefault()
-    console.log("drop", tileId, e.dataTransfer.getData("tileId"))
-    // selectTile(tileId)
-    console.log("dropped", e.dataTransfer.getData("tileId"), "on", tileId)
   }
 
   useEffect(() => {
@@ -62,7 +31,7 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
 
   useEffect(() => {
     if (selectedId) {
-      const [selectedX, selectedY] = selectedId.split("-").map(Number)
+      const [selectedX, selectedY] = selectedId.split(";").map(Number)
       const newPiece = getPiece(gameState, selectedX, selectedY)
       if (newPiece) {
         setSelectedPiece(newPiece)
@@ -81,10 +50,19 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
   const isTilePossibleTarget = selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
   const isTilePossibleMove = selectedIsOwn && isPossibleMove && !isTilePossibleTarget
 
+  let pieceImg = ""
+  if (piece) {
+    if (piece.type === "bear") {
+      pieceImg = "bear"
+    } else {
+      let addon = piece.type === "fish" && piece.isQueen ? "-queen" : ""
+      addon = piece.type === "king" && piece.hasBanana ? "-banana" : ""
+      pieceImg = `${piece.type}${addon}-${piece.white ? 'white' : 'black'}`
+    }
+  }
+
   return (
     <div onMouseUp={tileMouseUp}
-      onDrop={onDrop}
-      onDragOver={(e) => { e.preventDefault() }}
       className={`
         ${styles.tile}
         ${isTileBlack && styles.black}
@@ -93,15 +71,11 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
         ${isTilePossibleTarget && styles.highlighted}
         ${isTilePossibleMove && styles.possibleMove}
       `}>
-      <div className={`${styles.piece} ${dragging ? styles.draggingPiece : ''}`}
+      <div className={`${styles.piece}`}
         style={{ cursor: (piece?.white === isPlayerWhite || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
-        draggable={canMove}
-        onDragStart={onDragStart}
-        onDrag={onDrag}
-        onDragEnd={onDragEnd}
       >
         {piece && <Image
-          src={images[`${piece.type}-${piece.white ? 'white' : 'black'}`]}
+          src={images[pieceImg]}
           alt="Picture of the author"
         />}
       </div>

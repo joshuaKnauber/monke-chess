@@ -12,6 +12,7 @@
   align-items: center;
   justify-content: center;
   margin: 2rem 0rem;
+  position: relative;
 }
 
 @media (min-width: 768px) {
@@ -90,6 +91,24 @@
   pointer-events: none;
   background-color: rgba(0, 0, 0, 0.6);
   border-radius: 50%;
+}
+
+.bearTile {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8%;
+  aspect-ratio: 1;
+}
+.bearTile .tile {
+  width: 100%;
+  background: transparent;
+}
+.bearTile .tile.tile.highlighted::before {
+  border-radius: 50%;
+  padding: 10%;
 }
 
 .piece {
