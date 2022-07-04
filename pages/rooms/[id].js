@@ -1,7 +1,7 @@
-import styles from '../../styles/Home.module.css'
+import styles from '../../styles/Game.module.css'
 import { db } from '../../firebase/initFirebase'
 import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Board from '../../components/Board'
 
 const NEW_GAME = {
@@ -56,8 +56,9 @@ export default function Room(props) {
   const [isPlayerWhite, setIsPlayerWhite] = useState(null)
 
   const [copiedLink, setCopiedLink] = useState(false)
+  const boardRef = useRef(null)
 
-  const onRoomUpdate = (data) => {
+  const onRoomUpdate = useCallback((data) => {
     if (data.history.length) {
       setGameState(data.history[data.history.length-1])
     }
@@ -75,7 +76,7 @@ export default function Room(props) {
     } else if (localStorage.getItem(id)) {
       setIsPlayerWhite(localStorage.getItem(id) === 'white')
     }
-  }
+  }, [data, isPlayerWhite])
 
   const writePickedPlayer = async (color, name) => {
     try {
@@ -149,7 +150,7 @@ export default function Room(props) {
     return () => {
       unsub()
     }
-  }, [])
+  }, [onRoomUpdate])
 
   if (!gameState) return <></>
 
@@ -171,11 +172,15 @@ export default function Room(props) {
       {playerWhite !== playerBlack && <><button onClick={switchPlayer}>switch player</button><br/></>}
       you are playing {playerBlack === playerWhite ? "both players" : isPlayerWhite ? "white" : "black"}<br/>
       {gameState.whitesTurn ? "white" : "black"} has next move
-      <Board
-        key={isPlayerWhite}
-        isPlayerWhite={isPlayerWhite}
-        gameState={gameState}
-        updateGameState={updateGameState}/>
+      <div className={styles.board} ref={boardRef}>
+        {(!playerBlack || !playerWhite) && <div className={styles.waitingOverlay}>waiting for other player</div>}
+        <Board
+          key={isPlayerWhite}
+          isPlayerWhite={isPlayerWhite}
+          isBothPlayers={playerWhite === playerBlack}
+          gameState={gameState}
+          updateGameState={updateGameState}/>
+      </div>
     </div>
   )
 }

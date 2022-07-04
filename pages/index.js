@@ -11,10 +11,18 @@ export default function Home() {
   const [id, setId] = useState("")
   const [openRooms, setOpenRooms] = useState([])
 
+  const [loadingRoom, setLoadingRoom] = useState(false)
+
   const submit = () => {
     if (id !== '') {
       router.push(`/rooms/${id}`)
+      setLoadingRoom(true)
     }
+  }
+
+  const joinRoom = (id) => {
+    router.push(`/rooms/${id}`)
+    setLoadingRoom(true)
   }
 
   useEffect(() => {
@@ -27,6 +35,12 @@ export default function Home() {
     }
   }, [])
 
+  if (loadingRoom) {
+    return <div>
+      loading room
+    </div>
+  }
+
   return (
     <div className={styles.container}>
       <h1>Monke Chess</h1>
@@ -35,7 +49,7 @@ export default function Home() {
       {openRooms.map(room => <div className={styles.room} key={room.id}>
         {room.id}<br/>
         {room.white} vs {room.black}<br/>
-        <button onClick={() => router.push(`/rooms/${room.id}`)}>Join</button>
+        <button onClick={() => joinRoom(room.id)}>Join</button>
       </div>)}
     </div>
   )

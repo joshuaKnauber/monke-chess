@@ -4,7 +4,7 @@ import Tile from './Tile';
 import getMoves from './utils/getMoves';
 import { getPiece } from './utils/helpers';
 
-export default function Board({ isPlayerWhite, gameState, updateGameState }) {
+export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateGameState }) {
 
   const [selectedTileId, setSelectedTileId] = useState(null)
   const [possibleMoves, setPossibleMoves] = useState([])
@@ -71,13 +71,15 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
     }
   }
 
+  const rotateBoard = !isPlayerWhite && !isBothPlayers
+
   return (
     <div className={styles.container} onDragStart={removeDragImg}>
       <div className={styles.boardContainer} onDragStart={removeDragImg}>
         <div className={styles.jailContainer}>
           <Tile
-            x={-1}
-            y={isPlayerWhite ? 4 : 3}
+            x={!rotateBoard ? -1 : 8}
+            y={!rotateBoard ? 4 : 3}
             possibleMoves={possibleMoves}
             canMove={canMove}
             selectedId={selectedTileId}
@@ -85,8 +87,8 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
             selectTile={onSelectTile}
             />
           <Tile
-            x={-1}
-            y={isPlayerWhite ? 3 : 4}
+            x={!rotateBoard ? -1 : 8}
+            y={!rotateBoard ? 3 : 4}
             possibleMoves={possibleMoves}
             canMove={canMove}
             selectedId={selectedTileId}
@@ -96,8 +98,8 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
         </div>
         <div className={styles.board}>
           {Array.from({ length: 64 }).map((_, index) => {
-            let tileX = index % 8
-            let tileY = isPlayerWhite ? 7 - Math.floor(index/8) : Math.floor(index/8)
+            let tileX = rotateBoard ? 7 - index % 8 : index % 8
+            let tileY = !rotateBoard ? 7 - Math.floor(index/8) : Math.floor(index/8)
             return <Tile
               key={`${tileX}-${tileY}`}
               x={tileX}
@@ -113,8 +115,8 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
         </div>
         <div className={styles.jailContainer}>
           <Tile
-            x={8}
-            y={isPlayerWhite ? 4 : 3}
+            x={!rotateBoard ? 8 : -1}
+            y={!rotateBoard ? 4 : 3}
             possibleMoves={possibleMoves}
             canMove={canMove}
             selectedId={selectedTileId}
@@ -122,8 +124,8 @@ export default function Board({ isPlayerWhite, gameState, updateGameState }) {
             selectTile={onSelectTile}
           />
           <Tile
-            x={8}
-            y={isPlayerWhite ? 3 : 4}
+            x={!rotateBoard ? 8 : -1}
+            y={!rotateBoard ? 3 : 4}
             possibleMoves={possibleMoves}
             canMove={canMove}
             selectedId={selectedTileId}

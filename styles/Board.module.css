@@ -56,9 +56,9 @@
     repeating-linear-gradient(
       -45deg,
       rgb(247, 243, 229),
-      rgb(247, 243, 229) 10px,
-      rgb(208, 202, 180) 10px,
-      rgb(208, 202, 180) 20px
+      rgb(247, 243, 229) 8%,
+      rgb(208, 202, 180) 8%,
+      rgb(208, 202, 180) 18%
     );
 }
 .tile.jail.black {
@@ -67,9 +67,9 @@
     repeating-linear-gradient(
       -45deg,
       rgb(44, 74, 130),
-      rgb(44, 74, 130) 10px,
-      rgb(29, 54, 99) 10px,
-      rgb(29, 54, 99) 20px
+      rgb(44, 74, 130) 8%,
+      rgb(29, 54, 100) 8%,
+      rgb(29, 54, 100) 18%
     );
 }
 
