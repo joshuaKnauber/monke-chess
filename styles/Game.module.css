@@ -103,7 +103,7 @@
   max-width: 300px;
   padding: .6rem .7rem;
   font-size: .9rem;
-  border-radius: .5rem;
+  border-radius: .4rem;
   border: none;
 }
 
@@ -118,7 +118,7 @@
 
 .playerContainer button {
   flex: 1;
-  padding: .5rem;
+  padding: .7rem;
   border-radius: .2rem;
   border: none;
   cursor: pointer;

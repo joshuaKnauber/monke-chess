@@ -15,8 +15,8 @@ export default function Home() {
   const [loadingRoom, setLoadingRoom] = useState(false)
 
   const submit = () => {
-    if (id !== '') {
-      router.push(`/rooms/${id}`)
+    if (id.trim() !== '') {
+      router.push(`/rooms/${id.trim()}`)
       setLoadingRoom(true)
     }
   }
@@ -56,7 +56,7 @@ export default function Home() {
         <div className={styles.content}>
           <h1>Monke Chess</h1>
           <div className={styles.newGameContainer}>
-            <input type='text' onChange={(e) => setId(e.target.value.trim())} value={id} placeholder='Room ID' />
+            <input type='text' onChange={(e) => setId(e.target.value)} value={id} placeholder='Room ID' />
             <button disabled={id === ""} onClick={submit}>Create or Join Room</button>
           </div>
           {openRooms.map(room => <div className={styles.room} key={room.id}>
