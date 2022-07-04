@@ -1,7 +1,9 @@
 import styles from '../../styles/Game.module.css'
 import { db } from '../../firebase/initFirebase'
+import { useRouter } from 'next/router' 
 import Head from 'next/head'
 import { useWindowSize } from 'react-use';
+import { FaUser, FaAngleLeft, FaCopy, FaCheck } from "react-icons/fa"
 import Confetti from 'react-confetti'
 import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -52,6 +54,8 @@ const NEW_GAME = {
 export default function Room(props) {
 
   const {width, height} = useWindowSize();
+
+  const router = useRouter()
 
   const { roomId, data, id } = props
 
@@ -161,34 +165,38 @@ export default function Room(props) {
 
   if (!gameState) return <></>
 
-  if (isPlayerWhite === null) {
-    return <>
-      <Head>
-        <title>{roomId}</title>
-      </Head>
-      <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Name"></input>
-      <button disabled={playerName === "" && playerWhite === null} onClick={() => pickPlayer(true)}>white{playerWhite ? `: ${playerWhite}` : ""}</button>
-      <button disabled={playerName === "" && playerBlack === null} onClick={() => pickPlayer(false)}>black{playerBlack ? `: ${playerBlack}` : ""}</button>
-      <button disabled={playerName === "" || (playerBlack && playerWhite && playerWhite !== playerBlack)} onClick={() => pickBothPlayers()}>play both</button>
-    </>
-  }
-
   return (
     <>
       <Head>
         <title>Monke Chess: {roomId}</title>
       </Head>
       {/* <Confetti width={width} height={height}/> */}
-      <div className={styles.container}>
-        <div style={{ display: "flex", flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-          <h1>Room: {roomId}</h1>
-          <button style={{ height: 30 }} onClick={copyRoomLink}>{copiedLink ? "Copied" : "Copy Link"}</button>
+      {isPlayerWhite === null && <div className={styles.playerContainer}>
+        {(!playerWhite || !playerBlack) && <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Player Name"></input>}
+        <div className={styles.row}>
+          <button disabled={playerName === "" && playerWhite === null} onClick={() => pickPlayer(true)}>White{playerWhite ? `: ${playerWhite}` : ""}</button>
+          <button className={styles.black} disabled={playerName === "" && playerBlack === null} onClick={() => pickPlayer(false)}>Black{playerBlack ? `: ${playerBlack}` : ""}</button>
         </div>
-        {playerWhite !== playerBlack && <><button onClick={switchPlayer}>switch player</button><br/></>}
-        you are playing {playerBlack === playerWhite ? "both players" : isPlayerWhite ? "white" : "black"}<br/>
-        {gameState.whitesTurn ? "white" : "black"} has next move
+        {!playerWhite && !playerBlack && <div className={styles.row}>
+          <button className={styles.both} disabled={playerName === "" || (playerBlack && playerWhite && playerWhite !== playerBlack)} onClick={() => pickBothPlayers()}>Play Both Sides</button>
+        </div>}
+      </div>}
+      <div className={styles.container}>
+        <div className={styles.header} style={{ opacity: isPlayerWhite === null ? 0 : 1 }}>
+          <p className={styles.roomTitle}>{roomId}</p>
+          <div className={styles.title}>
+            <button className={styles.backBtn} onClick={() => {router.push("/")}}><FaAngleLeft size={20}/></button>
+            <h1>
+              <span className={`${gameState.whitesTurn && styles.active}`}>
+                {playerWhite||"?"}</span> vs <span className={`${styles.black} ${!gameState.whitesTurn && styles.active}`}>
+                {playerBlack||"?"}</span>
+            </h1>
+            <button onClick={copyRoomLink}>{copiedLink ? <FaCheck size={20}/> : <FaCopy size={20}/>}</button>
+          </div>
+          {playerWhite !== playerBlack && <><button className={styles.switchBtn} onClick={switchPlayer}><FaUser size={12}/>Switch</button><br/></>}
+        </div>
         <div className={styles.board} ref={boardRef}>
-          {(!playerBlack || !playerWhite) && <div className={styles.waitingOverlay}>waiting for other player</div>}
+          {(!playerBlack || !playerWhite) && isPlayerWhite !== null && <div className={styles.waitingOverlay}>Waiting For Other Player</div>}
           <Board
             isPlayerWhite={isPlayerWhite}
             isBothPlayers={playerWhite === playerBlack}

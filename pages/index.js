@@ -41,8 +41,8 @@ export default function Home() {
       <Head>
         <title>Loading</title>
       </Head>
-      <div>
-        loading room
+      <div className={styles.loadingContainer}>
+        Loading...
       </div>
     </>
   }
@@ -53,14 +53,19 @@ export default function Home() {
         <title>Monke Chess</title>
       </Head>
       <div className={styles.container}>
-        <h1>Monke Chess</h1>
-        <input type='text' onChange={(e) => setId(e.target.value.trim())} value={id} placeholder='Room ID' />
-        <button disabled={id === ""} onClick={submit}>Create Room</button>
-        {openRooms.map(room => <div className={styles.room} key={room.id}>
-          {room.id}<br/>
-          {room.white} vs {room.black}<br/>
-          <button onClick={() => joinRoom(room.id)}>Join</button>
-        </div>)}
+        <div className={styles.content}>
+          <h1>Monke Chess</h1>
+          <div className={styles.newGameContainer}>
+            <input type='text' onChange={(e) => setId(e.target.value.trim())} value={id} placeholder='Room ID' />
+            <button disabled={id === ""} onClick={submit}>Create or Join Room</button>
+          </div>
+          {openRooms.map(room => <div className={styles.room} key={room.id}>
+            <p className={styles.players}>
+              <span>{room.white||"?"}</span> vs <span>{room.black||"?"}</span></p>
+            <p className={styles.roomId}>{room.id}</p>
+            <button onClick={() => joinRoom(room.id)}>Join</button>
+          </div>)}
+        </div>
       </div>
     </>
   )
