@@ -64,7 +64,7 @@ export default function movesQueen(gameState, piece) {
     }
 
     
-    moves = removeImpossible(gameState, moves);
+    moves = removeImpossible(gameState, moves, piece);
 
   return moves
 }

@@ -3,12 +3,16 @@ export const getPiece = (gameState, x, y) => {
 }
 
 
-export const removeImpossible = (gameState, moves) => {
+export const removeImpossible = (gameState, moves, piece) => {
   moves = moves.filter(move => {
     if (!(move[1] < 0 || move[1] > 7 || move[2] < 0 || move[2] > 7)) {
       let target = getPiece(gameState, move[0], move[1])
-      if (target && target.white === gameState.whitesTurn && target.white !== null) {
-        return false
+      if (target) {
+        if (piece.white === null) {
+          return false
+        } else if (target.white === gameState.whitesTurn) {
+          return false
+        }
       }
       return true
     }

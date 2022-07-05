@@ -1,4 +1,3 @@
-import { base64urlEncodeWithoutPadding } from "@firebase/util";
 import { getPiece } from "./helpers";
 import { removeImpossible } from "./helpers";
 
@@ -7,7 +6,7 @@ export default function movesMonkey(gameState, piece) {
 
 
     
-    moves = removeImpossible(gameState, moves);
+    moves = removeImpossible(gameState, moves, piece);
 
   return moves
 }

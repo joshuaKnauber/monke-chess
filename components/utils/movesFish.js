@@ -19,7 +19,7 @@ export default function movesFish(gameState, piece) {
     }
   }
 
-  moves = removeImpossible(gameState, moves);
+  moves = removeImpossible(gameState, moves, piece);
 
   return moves
 }
