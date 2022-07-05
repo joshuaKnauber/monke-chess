@@ -45,8 +45,9 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
 
   const isTileBlack = (x + y) % 2
   const isTileJail = x < 0 || x > 7
-  const isTileSelected = selectedId === tileId && piece && piece.white === isPlayerWhite
-  const selectedIsOwn = selectedPiece && selectedPiece.white === isPlayerWhite
+  const canSelectTile = piece && (piece.white === isPlayerWhite || piece.white === null)
+  const isTileSelected = selectedId === tileId && canSelectTile
+  const selectedIsOwn = selectedPiece && (selectedPiece.white === isPlayerWhite || selectedPiece.white === null)
   const isTilePossibleTarget = selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
   const isTilePossibleMove = selectedIsOwn && isPossibleMove && !isTilePossibleTarget
 
@@ -72,7 +73,7 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
         ${isTilePossibleMove && styles.possibleMove}
       `}>
       <div className={`${styles.piece}`}
-        style={{ cursor: (piece?.white === isPlayerWhite || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
+        style={{ cursor: (canSelectTile || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
       >
         {piece && <Image
           src={images[pieceImg]}

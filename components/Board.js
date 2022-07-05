@@ -19,29 +19,38 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
     if (canMoveHere) {
       const newGameState = JSON.parse(JSON.stringify(gameState))
       newGameState.whitesTurn = !newGameState.whitesTurn
+      // get moved piece
+      let movedPiece = getPiece(newGameState, fromX, fromY)
+      // remove pieces
+      let tookPiece = false
+      newGameState.board = newGameState.board.filter(element => {
+        let isToPiece = (element.x === toX && element.y === toY)
+        if (isToPiece) { tookPiece = true }
+        return !isToPiece
+      })
+      // set rooks
+      newGameState.board.forEach(element => {
+        if (element.type === "rook") {
+          if (element.white !== gameState.whitesTurn) {
+            element.canTake = tookPiece
+          } else {
+            element.canTake = false
+          }
+        }
+      })
       // find bear and switch white/black
       let bear = newGameState.board.find(element => element.type === "bear")
-      if (bear) { bear.white = newGameState.whitesTurn }
-      // create new piece
-      let newPiece = getPiece(newGameState, fromX, fromY)
-      newPiece.x = toX
-      newPiece.y = toY
+      if (bear) { bear.white = null }
+      movedPiece.x = toX
+      movedPiece.y = toY
       // set bear to deployed if moved
-      if (newPiece.type === "bear") { newPiece.isDeployed = true }
+      if (movedPiece.type === "bear") { movedPiece.isDeployed = true }
       // fish queen
-      if (newPiece.type == "fish") {
-        if ((newPiece.white && newPiece.y === 7) || (!newPiece.white && newPiece.y === 0)) {
-          newPiece.isQueen = true
+      if (movedPiece.type == "fish") {
+        if ((movedPiece.white && movedPiece.y === 7) || (!movedPiece.white && movedPiece.y === 0)) {
+          movedPiece.isQueen = true
         }
       }
-      // remove pieces
-      newGameState.board = newGameState.board.filter(element => {
-        let isFromPiece = element.x !== fromX || element.y !== fromY
-        let isToPiece = element.x !== toX || element.y !== toY
-        return isFromPiece && isToPiece
-      })
-      // add new piece
-      newGameState.board.push(newPiece)
       // update game state
       updateGameState(newGameState)
     }
@@ -51,7 +60,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
     if (canMove && selectedTileId && selectedTileId !== tileId) {
       const [fromX, fromY] = selectedTileId.split(";").map(Number)
       let piece = getPiece(gameState, fromX, fromY)
-      if (piece && piece.white === isPlayerWhite) {
+      if (piece && (piece.white === isPlayerWhite || piece.white === null)) {
         tryMove(selectedTileId, tileId)
       }
     }
