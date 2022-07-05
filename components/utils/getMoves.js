@@ -4,6 +4,7 @@ import movesRook from "./movesRook"
 import movesElephant from "./movesElephant"
 import movesQueen from "./movesQueen"
 import movesKing from "./movesKing"
+import movesMonkey from "./movesMonkey"
 
 export default function getMoves(gameState, fromTileId) {
   const [x, y] = fromTileId.split(";").map(Number)
@@ -22,6 +23,8 @@ export default function getMoves(gameState, fromTileId) {
         return movesKing(gameState, piece)
       case "bear":
         return movesBear(gameState, piece)
+      case "monkey":
+        return movesMonkey(gameState, piece)
       default:
         return []
     }
