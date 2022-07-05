@@ -187,25 +187,27 @@ export default function Room(props) {
   }
 
   const undo = async () => {
-    if (gameData.history.length > 1) {
-      try {
-        const roomRef = doc(db, "rooms", id);
-        let newHistory = [...gameData.history]
-        let undos = [{
-            name: isPlayerWhite ? playerWhite : playerBlack,
-            time: new Date().toISOString()
-          },
-          ...gameData.undos||[]
-        ]
-        newHistory.pop()
-        const update = {
-          history: newHistory,
-          undos: undos,
+    if (confirm("Are you sure you want to undo?")) {
+      if (gameData.history.length > 1) {
+        try {
+          const roomRef = doc(db, "rooms", id);
+          let newHistory = [...gameData.history]
+          let undos = [{
+              name: isPlayerWhite ? playerWhite : playerBlack,
+              time: new Date().toISOString()
+            },
+            ...gameData.undos||[]
+          ]
+          newHistory.pop()
+          const update = {
+            history: newHistory,
+            undos: undos,
+          }
+          await updateDoc(roomRef, update);
+        } catch (e) {
+          console.error("Error updating document: ", e);
+          throw e
         }
-        await updateDoc(roomRef, update);
-      } catch (e) {
-        console.error("Error updating document: ", e);
-        throw e
       }
     }
   }
