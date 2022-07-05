@@ -337,7 +337,7 @@ export default function Room(props) {
           {(gameData.undos||[]).map(undo => {
             let time = undo.time
             let date = new Date(time)
-            return <p>{undo.name} used undo at {date.getHours()}:{date.getMinutes()}:{date.getSeconds()} on {date.getDay().toString().padStart(2, "0")}.{date.getMonth().toString().padStart(2, "0")}.{date.getFullYear()}</p>
+            return <p key={time}>{undo.name} used undo at {date.getHours()}:{date.getMinutes()}:{date.getSeconds()} on {date.getDay().toString().padStart(2, "0")}.{date.getMonth().toString().padStart(2, "0")}.{date.getFullYear()}</p>
           })}
         </div>
       </div>
