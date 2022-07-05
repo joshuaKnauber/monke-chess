@@ -43,13 +43,23 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
     }
   }, [selectedId])
 
-  const isTileBlack = (x + y) % 2
-  const isTileJail = x < 0 || x > 7
-  const canSelectTile = piece && (piece.white === isPlayerWhite || piece.white === null)
-  const isTileSelected = selectedId === tileId && canSelectTile
-  const selectedIsOwn = selectedPiece && (selectedPiece.white === isPlayerWhite || selectedPiece.white === null)
-  const isTilePossibleTarget = selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
-  const isTilePossibleMove = selectedIsOwn && isPossibleMove && !isTilePossibleTarget
+  let isTileBlack = (x + y) % 2
+  let isTileJail = x < 0 || x > 7
+  let canSelectTile = piece && (piece.white === isPlayerWhite || piece.white === null)
+  let isTileSelected = selectedId === tileId && canSelectTile
+  let selectedIsOwn = selectedPiece && (selectedPiece.white === isPlayerWhite || selectedPiece.white === null)
+  let isTilePossibleTarget = selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
+  let isTilePossibleMove = selectedIsOwn && isPossibleMove && !isTilePossibleTarget
+
+  let isJailAndJailable = !piece && gameState.jailablePiece && gameState.jailablePiece.white !== isPlayerWhite && isTileJail && ((gameState.whitesTurn && x > 7) || (!gameState.whitesTurn && x < 0))
+  if (!isJailAndJailable && gameState.jailablePiece) {
+    canSelectTile = false
+    isTileSelected = false
+    selectedIsOwn = false
+    isTilePossibleTarget = false
+    isTilePossibleMove = false
+  }
+
 
   let pieceImg = ""
   if (piece) {
@@ -71,9 +81,11 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
         ${isTileSelected && styles.highlighted}
         ${isTilePossibleTarget && styles.highlighted}
         ${isTilePossibleMove && styles.possibleMove}
+        ${isJailAndJailable && styles.highlighted}
+        ${isJailAndJailable && styles.possibleMove}
       `}>
       <div className={`${styles.piece}`}
-        style={{ cursor: (canSelectTile || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
+        style={{ cursor: (canSelectTile || isJailAndJailable || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
       >
         {piece && <Image
           src={images[pieceImg]}

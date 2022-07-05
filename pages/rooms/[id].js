@@ -1,16 +1,17 @@
 import styles from '../../styles/Game.module.css'
 import { db } from '../../firebase/initFirebase'
-import { useRouter } from 'next/router' 
+import { useRouter, useQueryParams } from 'next/router' 
 import Head from 'next/head'
 import { useWindowSize } from 'react-use';
 import { FaUser, FaAngleLeft, FaCopy, FaCheck } from "react-icons/fa"
 import Confetti from 'react-confetti'
-import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Board from '../../components/Board'
 
 const NEW_GAME = {
   whitesTurn: true,
+  jailablePiece: null,
 
   board: [
     { x: 0, y: 0, type: 'rook', white: true, canTake: false },
@@ -59,7 +60,7 @@ export default function Room(props) {
 
   const { roomId, data, id } = props
 
-  const [gameState,  setGameState] = useState(null)
+  const [gameState, setGameState] = useState(null)
 
   const [playerName, setPlayerName] = useState("")
   const [playerWhite, setPlayerWhite] = useState(null)
@@ -70,6 +71,14 @@ export default function Room(props) {
   const boardRef = useRef(null)
 
   const onRoomUpdate = useCallback((data) => {
+    if (!data) {
+      // go back if room was closed
+      router.push("/")
+      return
+    }
+    if (playerWhite && playerBlack && (data.white !== playerWhite || data.black !== playerBlack)) {
+      window.location.reload() // reload when other person reset the game
+    }
     if (data.history.length) {
       setGameState(data.history[data.history.length-1])
     }
@@ -85,7 +94,14 @@ export default function Room(props) {
       const isWhitesTurn = data.history[data.history.length-1].whitesTurn
       setIsPlayerWhite(isWhitesTurn)
     } else if (localStorage.getItem(id)) {
-      setIsPlayerWhite(localStorage.getItem(id) === 'white')
+      const isWhite = localStorage.getItem(id) === 'white'
+      if (isWhite && data.white) {
+        setIsPlayerWhite(true)
+      } else if (!isWhite && data.black) {
+        setIsPlayerWhite(false)
+      } else {
+        localStorage.removeItem(id)
+      }
     }
   }, [data, isPlayerWhite])
 
@@ -139,6 +155,33 @@ export default function Room(props) {
     }
   }
 
+  const restartRoom = async () => {
+    try {
+      const roomRef = doc(db, "rooms", id);
+      await setDoc(roomRef, {
+        id: roomId,
+        history: [NEW_GAME],
+        black: "",
+        white: "",
+      });
+      window.location.reload()
+    } catch (e) {
+      console.error("Error updating document: ", e);
+      throw e
+    }
+  }
+
+  const deleteRoom = async () => {
+    try {
+      const roomRef = doc(db, "rooms", id);
+      await deleteDoc(roomRef);
+      router.push("/")
+    } catch (e) {
+      console.error("Error updating document: ", e);
+      throw e
+    }
+  }
+
   const copyRoomLink = () => {
     const link = window.location.href
     const textArea = document.createElement("textarea")
@@ -163,6 +206,57 @@ export default function Room(props) {
     }
   }, [onRoomUpdate])
 
+  const getPlayerWinState = (isWhite) => {
+    let beatKing = false
+    let beatQueen = false
+    if (gameState) {
+      gameState.board.forEach(piece => {
+        if (piece.type === "king" && piece.white !== isWhite) {
+          if (piece.x < 0 || piece.x > 7) {
+            beatKing = true
+          }
+        }
+        if (piece.type === "queen" && piece.white !== isWhite) {
+          if (piece.x < 0 || piece.x > 7) {
+            beatQueen = true
+          }
+        }
+      })
+    }
+    return beatKing && beatQueen
+  }
+
+  const playerWon = useMemo(() => {
+    let playerWon = getPlayerWinState(isPlayerWhite)
+    let enemyWon = getPlayerWinState(!isPlayerWhite)
+    return playerWon || (enemyWon && playerBlack === playerWhite)
+  }, [gameState])
+
+  const playerLost = useMemo(() => {
+    let enemyWon = getPlayerWinState(!isPlayerWhite)
+    return enemyWon && playerBlack !== playerWhite
+  }, [gameState])
+
+  useEffect(() => {
+    if (playerLost) {
+      document.body.classList.add("lost")
+    } else {
+      document.body.classList.remove("lost")
+    }
+    return () => {
+      document.body.classList.remove("lost")
+    }
+  }, [playerLost])
+
+  useEffect(() => {
+    const { query } = router
+    if (query.create) {
+      let newQuery = { ...query }
+      delete newQuery.create
+      router.replace({ query: newQuery })
+    }
+  }, [router])
+
   if (!gameState) return <></>
 
   return (
@@ -170,7 +264,7 @@ export default function Room(props) {
       <Head>
         <title>Monke Chess: {roomId}</title>
       </Head>
-      {/* <Confetti width={width} height={height}/> */}
+      {playerWon && <Confetti width={width} height={height}/>}
       {isPlayerWhite === null && <div className={styles.playerContainer}>
         {(!playerWhite || !playerBlack) && <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Player Name"></input>}
         <div className={styles.row}>
@@ -183,7 +277,7 @@ export default function Room(props) {
       </div>}
       <div className={styles.container}>
         <div className={styles.header} style={{ opacity: isPlayerWhite === null ? 0 : 1 }}>
-          <p className={styles.roomTitle}>{roomId}</p>
+          <p className={styles.roomTitle}>{roomId} (Playing {isPlayerWhite ? "White" : "Black"})</p>
           <div className={styles.title}>
             <button className={styles.backBtn} onClick={() => {router.push("/")}}><FaAngleLeft size={20}/></button>
             <h1>
@@ -197,6 +291,13 @@ export default function Room(props) {
         </div>
         <div className={styles.board} ref={boardRef}>
           {(!playerBlack || !playerWhite) && isPlayerWhite !== null && <div className={styles.waitingOverlay}>Waiting For Other Player</div>}
+          {(playerWon || playerLost) && <div className={styles.waitingOverlay}>
+            {playerWon ? "You won!" : "You lost..."}
+            <div>
+              <button onClick={deleteRoom}>Close Room</button>
+              <button onClick={restartRoom}>Restart Room</button>
+            </div>
+            </div>}
           <Board
             isPlayerWhite={isPlayerWhite}
             isBothPlayers={playerWhite === playerBlack}
@@ -224,7 +325,7 @@ export async function getServerSideProps(context) {
       id = querySnapshot.docs[0].id
     }
     // else create room
-    else {
+    else if (context.query.create === "true") {
       data = {
         id: roomId,
         history: [NEW_GAME],
@@ -233,6 +334,15 @@ export async function getServerSideProps(context) {
       }
       const docsRef = await addDoc(collection(db, "rooms"), data);
       id = docsRef.id
+    }
+    // else redirect to home
+    else {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false
+        }
+      }
     }
 
     return {

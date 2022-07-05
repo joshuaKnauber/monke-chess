@@ -12,6 +12,10 @@ body {
   overflow-y: auto;
 }
 
+body.lost {
+  filter: grayscale(100%);
+}
+
 a {
   color: inherit;
   text-decoration: none;

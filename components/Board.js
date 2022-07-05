@@ -18,14 +18,18 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
     const canMoveHere = moves.find(move => move[0] === toX && move[1] === toY) ? true : false
     if (canMoveHere) {
       const newGameState = JSON.parse(JSON.stringify(gameState))
-      newGameState.whitesTurn = !newGameState.whitesTurn
       // get moved piece
       let movedPiece = getPiece(newGameState, fromX, fromY)
       // remove pieces
       let tookPiece = false
       newGameState.board = newGameState.board.filter(element => {
         let isToPiece = (element.x === toX && element.y === toY)
-        if (isToPiece) { tookPiece = true }
+        if (isToPiece) {
+          tookPiece = true
+          if (["king", "queen"].includes(element.type)) {
+            newGameState.jailablePiece = {...element}
+          }
+        }
         return !isToPiece
       })
       // set rooks
@@ -52,20 +56,42 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
         }
       }
       // update game state
+      if (!newGameState.jailablePiece) {
+        newGameState.whitesTurn = !newGameState.whitesTurn
+      }
+      updateGameState(newGameState)
+    }
+  }
+
+  const tryMoveToJail = (toTileId) => {
+    if (gameState.jailablePiece.white === isPlayerWhite) return
+    const [toX, toY] = toTileId.split(";").map(Number)
+    if ((gameState.whitesTurn && toX > 7) || (!gameState.whitesTurn && toX < 0)) {
+      const newGameState = JSON.parse(JSON.stringify(gameState))
+      let jailedPiece = {...newGameState.jailablePiece}
+      jailedPiece.x = toX
+      jailedPiece.y = toY
+      newGameState.jailablePiece = null
+      newGameState.board.push(jailedPiece)
+      newGameState.whitesTurn = !newGameState.whitesTurn
       updateGameState(newGameState)
     }
   }
 
   const onSelectTile = (tileId) => {
-    if (canMove && selectedTileId && selectedTileId !== tileId) {
-      const [fromX, fromY] = selectedTileId.split(";").map(Number)
-      let piece = getPiece(gameState, fromX, fromY)
-      if (piece && (piece.white === isPlayerWhite || piece.white === null)) {
-        tryMove(selectedTileId, tileId)
+    if (gameState.jailablePiece) {
+      tryMoveToJail(tileId)
+    } else {
+      if (canMove && selectedTileId && selectedTileId !== tileId) {
+        const [fromX, fromY] = selectedTileId.split(";").map(Number)
+        let piece = getPiece(gameState, fromX, fromY)
+        if (piece && (piece.white === isPlayerWhite || piece.white === null)) {
+          tryMove(selectedTileId, tileId)
+        }
       }
+      setPossibleMoves(getMoves(gameState, tileId))
+      setSelectedTileId(tileId)
     }
-    setPossibleMoves(getMoves(gameState, tileId))
-    setSelectedTileId(tileId)
   }
   
   const resetSelectedTile = () => {

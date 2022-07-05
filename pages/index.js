@@ -16,7 +16,7 @@ export default function Home() {
 
   const submit = () => {
     if (id.trim() !== '') {
-      router.push(`/rooms/${id.trim()}`)
+      router.push(`/rooms/${id.trim()}?create=true`)
       setLoadingRoom(true)
     }
   }
@@ -25,6 +25,17 @@ export default function Home() {
     router.push(`/rooms/${id}`)
     setLoadingRoom(true)
   }
+
+  const handleRouteChange = () => {
+    setLoadingRoom(false)
+  }
+
+  useEffect(() => {
+    router.events.on('routeChangeComplete', handleRouteChange)
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    };
+  }, [router.events]);
 
   useEffect(() => {
     // keep track of updates
