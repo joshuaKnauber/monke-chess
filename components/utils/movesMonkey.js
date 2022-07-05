@@ -60,7 +60,7 @@ function swing(gamestate, square, foundMoves, finalMoves) {
     //         foundMoves = foundMoves.concat(temp[0])
     //         finalMoves = finalMoves.concat(temp[1])
             
-    //     }
+    //     }  
     // }
     // if (getPiece(gameState,piece.x + 1, piece.y + 1)) {
     //     if (/*[square[0] + 2, square[1] + 2] is not in foundMoves or finalMoves*/) {

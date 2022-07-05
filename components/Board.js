@@ -55,6 +55,17 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
           movedPiece.isQueen = true
         }
       }
+      // check if one piece is already in jail if there is a jailable piece
+      if (newGameState.jailablePiece) {
+        let jailX = newGameState.jailablePiece.white ? -1 : 8
+        let pieceInJail = newGameState.board.find(element => element.x === jailX)
+        if (pieceInJail) {
+          newGameState.jailablePiece.x = jailX
+          newGameState.jailablePiece.y = pieceInJail.y === 3 ? 4 : 3
+          newGameState.board.push(newGameState.jailablePiece)
+          newGameState.jailablePiece = null
+        }
+      }
       // update game state
       if (!newGameState.jailablePiece) {
         newGameState.whitesTurn = !newGameState.whitesTurn

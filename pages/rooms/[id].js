@@ -76,6 +76,7 @@ export default function Room(props) {
       router.push("/")
       return
     }
+    console.log(data.history[data.history.length - 1])
     if (playerWhite && playerBlack && (data.white !== playerWhite || data.black !== playerBlack)) {
       window.location.reload() // reload when other person reset the game
     }

@@ -45,11 +45,11 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
 
   let isTileBlack = (x + y) % 2
   let isTileJail = x < 0 || x > 7
-  let canSelectTile = piece && (piece.white === isPlayerWhite || piece.white === null)
-  let isTileSelected = selectedId === tileId && canSelectTile
-  let selectedIsOwn = selectedPiece && (selectedPiece.white === isPlayerWhite || selectedPiece.white === null)
-  let isTilePossibleTarget = selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
-  let isTilePossibleMove = selectedIsOwn && isPossibleMove && !isTilePossibleTarget
+  let canSelectTile = canMove && piece && (piece.white === isPlayerWhite || piece.white === null)
+  let isTileSelected = canMove && selectedId === tileId && canSelectTile
+  let selectedIsOwn = canMove && selectedPiece && (selectedPiece.white === isPlayerWhite || selectedPiece.white === null)
+  let isTilePossibleTarget = canMove && selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
+  let isTilePossibleMove = canMove && selectedIsOwn && isPossibleMove && !isTilePossibleTarget
 
   let isJailAndJailable = !piece && gameState.jailablePiece && gameState.jailablePiece.white !== isPlayerWhite && isTileJail && ((gameState.whitesTurn && x > 7) || (!gameState.whitesTurn && x < 0))
   if (!isJailAndJailable && gameState.jailablePiece) {
