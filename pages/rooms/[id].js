@@ -187,6 +187,7 @@ export default function Room(props) {
   }
 
   const undo = async () => {
+    console.log(gameData.history.length)
     if (confirm("Are you sure you want to undo?")) {
       if (gameData.history.length > 1) {
         try {

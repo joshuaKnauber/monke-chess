@@ -194,6 +194,9 @@
   margin: 0px;
   margin-top: 4px;
 }
+.undoContainer button:disabled {
+  opacity: .5;
+}
 .undoContainer p:first-of-type {
   margin-top: 12px;
 }
