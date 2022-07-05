@@ -29,6 +29,11 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
           if (["king", "queen"].includes(element.type)) {
             newGameState.jailablePiece = {...element}
           }
+          else if (element.type === "king" && element.white === movedPiece.white) {
+            newGameState.monkeyIsJailbreaking = true
+            element.x = element.x === -1 ? 0 : 7
+            tookPiece = false
+          }
         }
         return !isToPiece
       })
@@ -58,7 +63,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
       // check if one piece is already in jail if there is a jailable piece
       if (newGameState.jailablePiece) {
         let jailX = newGameState.jailablePiece.white ? -1 : 8
-        let pieceInJail = newGameState.board.find(element => element.x === jailX)
+        let pieceInJail = newGameState.board.find(element => element.x === jailX && (element.y === 4 || element.y === 5))
         if (pieceInJail) {
           newGameState.jailablePiece.x = jailX
           newGameState.jailablePiece.y = pieceInJail.y === 3 ? 4 : 3
@@ -67,7 +72,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
         }
       }
       // update game state
-      if (!newGameState.jailablePiece) {
+      if (!newGameState.jailablePiece && !newGameState.jailbreakMonkey) {
         newGameState.whitesTurn = !newGameState.whitesTurn
       }
       updateGameState(newGameState)

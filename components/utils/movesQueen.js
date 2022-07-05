@@ -1,9 +1,7 @@
 import { getPiece, possibleJailMoves, removeImpossible } from "./helpers";
 
 export default function movesQueen(gameState, piece) {
-  if (piece.x > 7 || piece.x < 0) {
-    return possibleJailMoves(gameState, piece);
-  }
+  if (piece.x > 7 || piece.x < 0) return [];
   
   let moves = []
   let possibleDirection = [true, true, true, true, true, true, true, true]

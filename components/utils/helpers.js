@@ -20,18 +20,3 @@ export const removeImpossible = (gameState, moves, piece) => {
   }) 
   return moves
 }
-
-
-export const possibleJailMoves = (gameState, piece) => {
-  let moves = []
-  if (piece.y === 3) {
-    if (!getPiece(gameState, piece.x, 4)) {
-      moves.push([piece.x, 4])
-    }
-  } else {
-    if (!getPiece(gameState, piece.x, 3)) {
-      moves.push([piece.x, 3])
-    }
-  }
-  return moves
-}

@@ -1,17 +1,18 @@
 import styles from '../../styles/Game.module.css'
 import { db } from '../../firebase/initFirebase'
-import { useRouter, useQueryParams } from 'next/router' 
+import { useRouter } from 'next/router' 
 import Head from 'next/head'
 import { useWindowSize } from 'react-use';
-import { FaUser, FaAngleLeft, FaCopy, FaCheck } from "react-icons/fa"
+import { FaUser, FaAngleLeft, FaCopy, FaCheck, FaUndo } from "react-icons/fa"
 import Confetti from 'react-confetti'
-import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Board from '../../components/Board'
 
 const NEW_GAME = {
   whitesTurn: true,
   jailablePiece: null,
+  monkeyIsJailbreaking: false,
 
   board: [
     { x: 0, y: 0, type: 'rook', white: true, canTake: false },
@@ -58,8 +59,9 @@ export default function Room(props) {
 
   const router = useRouter()
 
-  const { roomId, data, id } = props
+  const { roomId, id } = props
 
+  const [gameData, setGameData] = useState(null)
   const [gameState, setGameState] = useState(null)
 
   const [playerName, setPlayerName] = useState("")
@@ -70,41 +72,41 @@ export default function Room(props) {
   const [copiedLink, setCopiedLink] = useState(false)
   const boardRef = useRef(null)
 
-  const onRoomUpdate = useCallback((data) => {
-    if (!data) {
+  const onRoomUpdate = useCallback((roomData) => {
+    if (!roomData) {
       // go back if room was closed
       router.push("/")
       return
     }
-    console.log(data.history[data.history.length - 1])
-    if (playerWhite && playerBlack && (data.white !== playerWhite || data.black !== playerBlack)) {
+    if (playerWhite && playerBlack && (roomData.white !== playerWhite || roomData.black !== playerBlack)) {
       window.location.reload() // reload when other person reset the game
     }
-    if (data.history.length) {
-      setGameState(data.history[data.history.length-1])
+    setGameData(roomData)
+    if (roomData.history.length) {
+      setGameState(roomData.history[roomData.history.length-1])
     }
-    if (data.white) {
-      setPlayerWhite(data.white)
-      if (isPlayerWhite === true) { setPlayerName(data.white) }
+    if (roomData.white) {
+      setPlayerWhite(roomData.white)
+      if (isPlayerWhite === true) { setPlayerName(roomData.white) }
     }
-    if (data.black) {
-      setPlayerBlack(data.black)
-      if (isPlayerWhite === false) { setPlayerName(data.black) }
+    if (roomData.black) {
+      setPlayerBlack(roomData.black)
+      if (isPlayerWhite === false) { setPlayerName(roomData.black) }
     }
-    if (data.white && data.black && data.white === data.black) {
-      const isWhitesTurn = data.history[data.history.length-1].whitesTurn
+    if (roomData.white && roomData.black && roomData.white === roomData.black) {
+      const isWhitesTurn = roomData.history[roomData.history.length-1].whitesTurn
       setIsPlayerWhite(isWhitesTurn)
     } else if (localStorage.getItem(id)) {
       const isWhite = localStorage.getItem(id) === 'white'
-      if (isWhite && data.white) {
+      if (isWhite && roomData.white) {
         setIsPlayerWhite(true)
-      } else if (!isWhite && data.black) {
+      } else if (!isWhite && roomData.black) {
         setIsPlayerWhite(false)
       } else {
         localStorage.removeItem(id)
       }
     }
-  }, [data, isPlayerWhite])
+  }, [isPlayerWhite])
 
   const writePickedPlayer = async (color, name) => {
     try {
@@ -135,7 +137,7 @@ export default function Room(props) {
         await writePickedPlayer(pickedWhite ? "white" : "black", playerName)
       }
       setIsPlayerWhite(pickedWhite)
-      setPlayerName(pickedWhite ? data.white : data.black)
+      setPlayerName(pickedWhite ? gameData.white : gameData.black)
       localStorage.setItem(id, pickedWhite ? "white" : "black")
     } catch (e) {
       console.error("Error updating document: ", e);
@@ -148,7 +150,7 @@ export default function Room(props) {
     try {
       const roomRef = doc(db, "rooms", id);
       const update = {}
-      update.history = [...data.history, newGameState]
+      update.history = [...gameData.history, newGameState]
       await updateDoc(roomRef, update);
     } catch (e) {
       console.error("Error updating document: ", e);
@@ -164,6 +166,7 @@ export default function Room(props) {
         history: [NEW_GAME],
         black: "",
         white: "",
+        undos: []
       });
       window.location.reload()
     } catch (e) {
@@ -180,6 +183,30 @@ export default function Room(props) {
     } catch (e) {
       console.error("Error updating document: ", e);
       throw e
+    }
+  }
+
+  const undo = async () => {
+    if (gameData.history.length > 1) {
+      try {
+        const roomRef = doc(db, "rooms", id);
+        let newHistory = [...gameData.history]
+        let undos = [{
+            name: isPlayerWhite ? playerWhite : playerBlack,
+            time: new Date().toISOString()
+          },
+          ...gameData.undos||[]
+        ]
+        newHistory.pop()
+        const update = {
+          history: newHistory,
+          undos: undos,
+        }
+        await updateDoc(roomRef, update);
+      } catch (e) {
+        console.error("Error updating document: ", e);
+        throw e
+      }
     }
   }
 
@@ -305,6 +332,14 @@ export default function Room(props) {
             gameState={gameState}
             updateGameState={updateGameState}/>
         </div>
+        <div className={styles.undoContainer}>
+          <button onClick={undo} disabled={gameData.history.length === 1} className={styles.switchBtn}>{<FaUndo size={12}/>}Undo</button>
+          {(gameData.undos||[]).map(undo => {
+            let time = undo.time
+            let date = new Date(time)
+            return <p>{undo.name} used undo at {date.getHours()}:{date.getMinutes()}:{date.getSeconds()} on {date.getDay().toString().padStart(2, "0")}.{date.getMonth().toString().padStart(2, "0")}.{date.getFullYear()}</p>
+          })}
+        </div>
       </div>
     </>
   )
@@ -332,6 +367,7 @@ export async function getServerSideProps(context) {
         history: [NEW_GAME],
         black: "",
         white: "",
+        undos: []
       }
       const docsRef = await addDoc(collection(db, "rooms"), data);
       id = docsRef.id

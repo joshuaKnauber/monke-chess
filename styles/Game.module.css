@@ -82,6 +82,9 @@
 .title button:hover {
   background-color: rgba(255, 255, 255, .1);
 }
+.title button:disabled {
+  opacity: 0.5;
+}
 
 .playerContainer {
   position: fixed;
@@ -176,4 +179,21 @@
 .waitingOverlay button:nth-of-type(2) {
   background-color: rgb(44, 74, 130);
   color: white;
+}
+
+.undoContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.undoContainer p {
+  font-size: .9rem;
+  opacity: .6;
+  margin: 0px;
+  margin-top: 4px;
+}
+.undoContainer p:first-of-type {
+  margin-top: 12px;
 }
