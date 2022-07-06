@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+Written for fun in a few days, game based on [this video](https://www.youtube.com/watch?v=mcivL8u176Y&t=493s).
+
 ## Getting Started
 
 First, run the development server:
