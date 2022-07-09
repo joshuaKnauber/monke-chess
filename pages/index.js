@@ -75,6 +75,15 @@ export default function Home() {
     <>
       <Head>
         <title>Monke Chess</title>
+        <meta
+          property="og:title"
+          content="Monkey Chess"
+        />
+        <meta
+          property="og:description"
+          content="Better than normal chess because monke"
+        />
+        <meta property="og:image" content={`https://upload.wikimedia.org/wikipedia/commons/4/4e/Macaca_nigra_self-portrait_large.jpg`} />
       </Head>
       <div className={styles.container}>
         <div className={styles.content}>
