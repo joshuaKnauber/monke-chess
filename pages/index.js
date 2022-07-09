@@ -83,7 +83,7 @@ export default function Home() {
           property="og:description"
           content="Better than normal chess because monke"
         />
-        <meta property="og:image" content={`https://upload.wikimedia.org/wikipedia/commons/4/4e/Macaca_nigra_self-portrait_large.jpg`} />
+        <meta property="og:image" content={`https://api.time.com/wp-content/uploads/2015/09/monkey-selfie.jpg`} />
       </Head>
       <div className={styles.container}>
         <div className={styles.content}>

@@ -298,8 +298,8 @@ export default function Room(props) {
   }
   let percent = (num - min) / (max - min)
   let imgWidth = Math.floor(percent * 500)
-  let imgHeight = imgWidth * 2.5/4
-
+  let imgHeight = Math.floor(imgWidth * 2.5/4)
+  
   return (
     <>
       <Head>
