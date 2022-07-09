@@ -2,10 +2,11 @@ import { getPiece } from "./helpers";
 import { removeImpossible } from "./helpers";
 
 export default function movesMonkey(gameState, piece){
-  if(piece.x === -1 || piece.x === 8){
-    return movesMonkeyJail(gameState,[piece.x, piece.y], piece)
-  }
-  else{
+  if (piece.x === -1){
+    return movesMonkeyJail(gameState, [0, piece.y], piece)
+  } else if (piece.x === 8) {
+    return movesMonkeyJail(gameState, [7, piece.y], piece)
+  } else {
     return movesMonkeyNoJail(gameState, piece)
   }
 }
@@ -29,25 +30,26 @@ function movesMonkeyNoJail(gameState, piece) {
 
   let swingyboi = movesMonkeyJail(gameState, [piece.x,piece.y], piece)
   swingyboi.push([piece.x,piece.y])
-  let jail = [getPiece(gameState, -1, 3),getPiece(gameState, -1, 4),getPiece(gameState, 8, 3),getPiece(gameState, 8, 4)]
+  let jail = [
+    getPiece(gameState, -1, 3),
+    getPiece(gameState, -1, 4),
+    getPiece(gameState, 8, 3),
+    getPiece(gameState, 8, 4)
+  ]
   swingyboi.forEach(move => {
     if (move[0] === 0 && move[1] === 3 && jail[0] && jail[0].white === gameState.whitesTurn && jail[0].hasBanana === true) {
-      console.log(move,movesMonkeyJail(gameState, move, piece))
-      if(movesMonkeyJail(gameState, move, piece).length){
+      if (movesMonkeyJail(gameState, move, piece).length){
        moves.push([-1,3])
       }
-    }else if (move[0] === 0 && move[1] === 4 && jail[1] && jail[1].white === gameState.whitesTurn && jail[1].hasBanana === true) {
-      console.log(move,movesMonkeyJail(gameState, move, piece))
-      if(movesMonkeyJail(gameState, move, piece).length){
+    } else if (move[0] === 0 && move[1] === 4 && jail[1] && jail[1].white === gameState.whitesTurn && jail[1].hasBanana === true) {
+      if (movesMonkeyJail(gameState, move, piece).length){
        moves.push([-1,4])
       }
-    }else if (move[0] === 7 && move[1] === 3 && jail[2] && jail[2].white === gameState.whitesTurn && jail[2].hasBanana === true) {
-      console.log(move,movesMonkeyJail(gameState, move, piece))
-      if(movesMonkeyJail(gameState, move, piece).length){
+    } else if (move[0] === 7 && move[1] === 3 && jail[2] && jail[2].white === gameState.whitesTurn && jail[2].hasBanana === true) {
+      if (movesMonkeyJail(gameState, move, piece).length){
         moves.push([8,3])
       }
-    }else if (move[0] === 7 && move[1] === 4 && jail[3] && jail[3].white === gameState.whitesTurn && jail[3].hasBanana === true) {
-      console.log(move,movesMonkeyJail(gameState, move, piece))
+    } else if (move[0] === 7 && move[1] === 4 && jail[3] && jail[3].white === gameState.whitesTurn && jail[3].hasBanana === true) {
       if(movesMonkeyJail(gameState, move, piece).length){
         moves.push([8,4])
       }

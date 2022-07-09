@@ -26,13 +26,15 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
         let isToPiece = (element.x === toX && element.y === toY)
         if (isToPiece) {
           tookPiece = true
-          if (["king", "queen"].includes(element.type)) {
-            newGameState.jailablePiece = {...element}
-          }
-          else if (element.type === "king" && element.white === movedPiece.white) {
+          if (element.type === "king" && element.white === movedPiece.white) {
             newGameState.monkeyIsJailbreaking = true
             element.x = element.x === -1 ? 0 : 7
+            element.hasBanana = false
+            isToPiece = false
             tookPiece = false
+          }
+          else if (["king", "queen"].includes(element.type)) {
+            newGameState.jailablePiece = {...element}
           }
         }
         return !isToPiece
@@ -60,6 +62,10 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
           movedPiece.isQueen = true
         }
       }
+      // check if moved monkey out of jail
+      if (movedPiece.type === "monkey" && gameState.monkeyIsJailbreaking) {
+        newGameState.monkeyIsJailbreaking = false
+      }
       // check if one piece is already in jail if there is a jailable piece
       if (newGameState.jailablePiece) {
         let jailX = newGameState.jailablePiece.white ? -1 : 8
@@ -72,7 +78,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
         }
       }
       // update game state
-      if (!newGameState.jailablePiece && !newGameState.jailbreakMonkey) {
+      if (!newGameState.jailablePiece && !newGameState.monkeyIsJailbreaking) {
         newGameState.whitesTurn = !newGameState.whitesTurn
       }
       updateGameState(newGameState)
@@ -105,15 +111,28 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
           tryMove(selectedTileId, tileId)
         }
       }
+      if (gameState.monkeyIsJailbreaking) return
       setPossibleMoves(getMoves(gameState, tileId))
       setSelectedTileId(tileId)
     }
   }
   
   const resetSelectedTile = () => {
+    if (gameState.monkeyIsJailbreaking) return
     setSelectedTileId(null)
     setPossibleMoves([])
   }
+
+  useEffect(() => {
+    if (gameState.monkeyIsJailbreaking) {
+      let monkey = gameState.board.find(element => element.type === "monkey" && (element.x === -1 || element.x === 8))
+      if (monkey) {
+        let tileId = `${monkey.x};${monkey.y}`
+        setPossibleMoves(getMoves(gameState, tileId))
+        setSelectedTileId(tileId)
+      }
+    }
+  }, [gameState])
 
   useEffect(() => {
     resetSelectedTile()

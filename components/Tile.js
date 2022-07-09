@@ -60,7 +60,6 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
     isTilePossibleMove = false
   }
 
-
   let pieceImg = ""
   if (piece) {
     if (piece.type === "bear") {
