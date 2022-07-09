@@ -304,7 +304,6 @@ export default function Room(props) {
           property="og:description"
           content="Monkey Chess room"
         />
-        <meta property="og:image" content={props.randomImg} />
       </Head>
       {playerWon && <Confetti width={width} height={height}/>}
       {isPlayerWhite === null && <div className={styles.playerContainer}>

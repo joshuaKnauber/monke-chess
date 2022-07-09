@@ -75,15 +75,6 @@ export default function Home() {
     <>
       <Head>
         <title>Monke Chess</title>
-        <meta
-          property="og:title"
-          content="Monkey Chess"
-        />
-        <meta
-          property="og:description"
-          content="Better than normal chess because monke"
-        />
-        <meta property="og:image" content={`https://api.time.com/wp-content/uploads/2015/09/monkey-selfie.jpg`} />
       </Head>
       <div className={styles.container}>
         <div className={styles.content}>
