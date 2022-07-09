@@ -290,16 +290,8 @@ export default function Room(props) {
 
   if (!gameState) return <></>
 
-  let num = 0
-  let max = id.length * "z".charCodeAt(0)
-  let min = id.length * "0".charCodeAt(0)
-  for (let char of id) {
-    num += char.charCodeAt(0)
-  }
-  let percent = (num - min) / (max - min)
-  let imgWidth = Math.floor(percent * 500)
-  let imgHeight = Math.floor(imgWidth * 2.5/4)
   
+
   return (
     <>
       <Head>
@@ -312,7 +304,7 @@ export default function Room(props) {
           property="og:description"
           content="Monkey Chess room"
         />
-        <meta property="og:image" content={`https://www.placemonkeys.com/${imgWidth}/${imgHeight}`} />
+        <meta property="og:image" content={props.randomImg} />
       </Head>
       {playerWon && <Confetti width={width} height={height}/>}
       {isPlayerWhite === null && <div className={styles.playerContainer}>
@@ -404,11 +396,23 @@ export async function getServerSideProps(context) {
       }
     }
 
+    let num = 0
+    let max = id.length * "z".charCodeAt(0)
+    let min = id.length * "0".charCodeAt(0)
+    for (let char of id) {
+      num += char.charCodeAt(0)
+    }
+    let percent = (num - min) / (max - min)
+    let imgWidth = Math.floor(percent * 500)
+    let imgHeight = Math.floor(imgWidth * 2.5/4)
+    let randomImg = `https://www.placemonkeys.com/${imgWidth}/${imgHeight}`
+
     return {
       props: {
         roomId,
         data,
-        id
+        id,
+        randomImg
       },
     }
   } catch (error) {
