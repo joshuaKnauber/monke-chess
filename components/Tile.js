@@ -5,7 +5,7 @@ import { getPiece } from './utils/helpers'
 
 import { images } from '../components/utils/importImages'
 
-export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTile, selectedId }) {
+export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTile, selectedId, lastMove }) {
 
   const [selectedPiece, setSelectedPiece] = useState(null)
   const [piece, setPiece] = useState(null)
@@ -51,6 +51,9 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
   let isTilePossibleTarget = canMove && selectedIsOwn && isPossibleMove && piece && piece.white === !isPlayerWhite
   let isTilePossibleMove = canMove && selectedIsOwn && isPossibleMove && !isTilePossibleTarget
 
+  let isFromTile = lastMove ? lastMove.from === tileId : false
+  let isToTile = lastMove ? lastMove.to === tileId : false
+
   let isJailAndJailable = !piece && gameState.jailablePiece && gameState.jailablePiece.white !== isPlayerWhite && isTileJail && ((gameState.whitesTurn && x > 7) || (!gameState.whitesTurn && x < 0))
   if (!isJailAndJailable && gameState.jailablePiece) {
     canSelectTile = false
@@ -82,6 +85,8 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
         ${isTilePossibleMove && styles.possibleMove}
         ${isJailAndJailable && styles.highlighted}
         ${isJailAndJailable && styles.possibleMove}
+        ${isFromTile && styles.moveFrom}
+        ${isToTile && styles.moveTo}
       `}>
       <div className={`${styles.piece}`}
         style={{ cursor: (canSelectTile || isJailAndJailable || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}

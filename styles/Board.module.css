@@ -93,6 +93,17 @@
   border-radius: 50%;
 }
 
+.tile.moveFrom {
+  outline: 3px solid rgb(47, 162, 229);
+  outline-style: dashed;
+  outline-offset: -3px;
+}
+.tile.moveTo {
+  outline: 3px solid rgb(47, 162, 229);
+  outline-style: dashed;
+  outline-offset: -3px;
+}
+
 .bearTile {
   position: absolute;
   z-index: 1;

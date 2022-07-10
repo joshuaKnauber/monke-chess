@@ -8,6 +8,8 @@ import Confetti from 'react-confetti'
 import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Board from '../../components/Board'
+import getMoves from '../../components/utils/getMoves';
+import { getPiece } from '../../components/utils/helpers';
 
 const NEW_GAME = {
   whitesTurn: true,
@@ -64,6 +66,8 @@ export default function Room(props) {
 
   const [gameData, setGameData] = useState(null)
   const [gameState, setGameState] = useState(null)
+  
+  const [lastMove, setLastMove] = useState(null)
 
   const [playerName, setPlayerName] = useState("")
   const [playerWhite, setPlayerWhite] = useState(null)
@@ -89,6 +93,9 @@ export default function Room(props) {
     setGameData(roomData)
     if (roomData.history.length) {
       setGameState(roomData.history[roomData.history.length-1])
+      if (roomData.history.length > 1) {
+        overwriteLastMove(roomData.history[roomData.history.length-2], roomData.history[roomData.history.length-1])
+      }
     }
     if (roomData.white) {
       setPlayerWhite(roomData.white)
@@ -112,6 +119,21 @@ export default function Room(props) {
       }
     }
   }, [isPlayerWhite])
+
+  const overwriteLastMove = (prevState, newState) => {
+    for (let piece of prevState.board) {
+      let newPiece = newState.board.find(p => p.x === piece.x && p.y === piece.y)
+      if (!newPiece) { // piece has moved
+        let options = getMoves(prevState, `${piece.x};${piece.y}`)
+        for (let option of options) {
+          let comparePiece = getPiece(newState, option[0], option[1])
+          if (comparePiece && comparePiece.type === piece.type) {
+            setLastMove({ from: `${piece.x};${piece.y}`, to: `${comparePiece.x};${comparePiece.y}` })
+          }
+        }
+      }
+    }
+  }
 
   const writePickedPlayer = async (color, name) => {
     try {
@@ -313,7 +335,7 @@ export default function Room(props) {
   }, [router])
 
   if (!gameState) return <></>
-  console.log(gameData)
+
   return (
     <>
       <Head>
@@ -384,6 +406,7 @@ export default function Room(props) {
             isPlayerWhite={isPlayerWhite}
             isBothPlayers={playerWhite === playerBlack}
             gameState={gameState}
+            lastMove={lastMove}
             updateGameState={updateGameState}/>
         </div>
 

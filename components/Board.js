@@ -4,7 +4,7 @@ import Tile from './Tile';
 import getMoves from './utils/getMoves';
 import { getPiece } from './utils/helpers';
 
-export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateGameState }) {
+export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateGameState, lastMove }) {
 
   const [selectedTileId, setSelectedTileId] = useState(null)
   const [possibleMoves, setPossibleMoves] = useState([])
@@ -170,6 +170,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
             canMove={canMove}
             selectedId={selectedTileId}
             gameState={gameState}
+            lastMove={lastMove}
             selectTile={onSelectTile}
           />
         </div>}
@@ -181,6 +182,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
             canMove={canMove}
             selectedId={selectedTileId}
             gameState={gameState}
+            lastMove={lastMove}
             selectTile={onSelectTile}
             />
           <Tile
@@ -190,6 +192,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
             canMove={canMove}
             selectedId={selectedTileId}
             gameState={gameState}
+            lastMove={lastMove}
             selectTile={onSelectTile}
           />
         </div>
@@ -205,6 +208,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
               canMove={canMove}
               selectedId={selectedTileId}
               gameState={gameState}
+              lastMove={lastMove}
               selectTile={onSelectTile}
             />
           }
@@ -218,6 +222,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
             canMove={canMove}
             selectedId={selectedTileId}
             gameState={gameState}
+            lastMove={lastMove}
             selectTile={onSelectTile}
           />
           <Tile
@@ -227,6 +232,7 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
             canMove={canMove}
             selectedId={selectedTileId}
             gameState={gameState}
+            lastMove={lastMove}
             selectTile={onSelectTile}
           />
         </div>
