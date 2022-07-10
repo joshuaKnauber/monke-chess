@@ -186,6 +186,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 1rem;
 }
 
 .undoContainer p {
@@ -196,7 +197,117 @@
 }
 .undoContainer button:disabled {
   opacity: .5;
+  cursor: default;
 }
 .undoContainer p:first-of-type {
   margin-top: 12px;
+}
+
+.undoHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: .5rem;
+}
+
+.undoLogBtn {
+  border: none;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: transparent;
+  color: white;
+}
+.undoLogBtn:hover {
+  background-color: rgba(255, 255, 255, .1);
+  cursor: pointer;
+}
+
+.chatContainer {
+  width: calc(100% - 2rem);
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 400px;
+  margin: 0rem auto;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  overflow: auto;
+}
+
+.chatContainer {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.chatContainer::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+.chatInputs {
+  display: flex;
+  width: 100%;
+  gap: .5rem;
+  margin-top: .2rem;
+  margin-bottom: .5rem;
+}
+.chatInputs input {
+  flex: 1;
+  padding: .5rem .8rem;
+  border-radius: .2rem;
+  border: none;
+  background-color: rgba(44, 74, 130, 0.3);
+  color: white;
+}
+.chatInputs input::placeholder {
+  color: rgba(187, 203, 235, 0.8);
+}
+.chatInputs input:focus {
+  border: none;
+  outline: none;
+}
+.chatInputs button {
+  padding: .4rem 1rem;
+  border-radius: .2rem;
+  font-weight: 600;
+  border: none;
+  background-color: rgb(44, 74, 130);
+  color: white;
+  cursor: pointer;
+}
+
+.msg {
+  background-color: rgba(255, 255, 255, 0.1);
+  margin-top: .5rem;
+  max-width: calc(100% - 50px);
+  margin-right: auto;
+  width: 100%;
+  padding: .7rem;
+  border-radius: .5rem;
+}
+.msg p:first-of-type {
+  font-size: .9rem;
+  margin: 0px;
+}
+
+.msg.fromSelf {
+  margin-right: unset;
+  margin-left: auto;
+  background-color: rgba(44, 74, 130, 0.3);
+}
+
+.msgFooter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-self: center;
+  margin-top: .6rem;
+}
+.msgFooter p {
+  font-size: .9rem;
+  opacity: .6;
+  margin: 0px;
 }

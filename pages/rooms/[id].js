@@ -3,7 +3,7 @@ import { db } from '../../firebase/initFirebase'
 import { useRouter } from 'next/router' 
 import Head from 'next/head'
 import { useWindowSize } from 'react-use';
-import { FaUser, FaAngleLeft, FaCopy, FaCheck, FaUndo } from "react-icons/fa"
+import { FaUser, FaAngleLeft, FaCopy, FaCheck, FaUndo, FaCaretDown, FaCaretLeft } from "react-icons/fa"
 import Confetti from 'react-confetti'
 import { collection, query, where, getDocs, addDoc, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -13,6 +13,7 @@ const NEW_GAME = {
   whitesTurn: true,
   jailablePiece: null,
   monkeyIsJailbreaking: false,
+  chat: [],
 
   board: [
     { x: 0, y: 0, type: 'rook', white: true, canTake: false },
@@ -71,6 +72,10 @@ export default function Room(props) {
 
   const [copiedLink, setCopiedLink] = useState(false)
   const boardRef = useRef(null)
+  
+  const [showUndoLog, setShowUndoLog] = useState(false)
+
+  const chatInp = useRef(null)
 
   const onRoomUpdate = useCallback((roomData) => {
     if (!roomData) {
@@ -158,6 +163,25 @@ export default function Room(props) {
     }
   }
 
+  const sendMessage = async () => {
+    if (chatInp.current?.value.trim()) {
+      try {
+        const roomRef = doc(db, "rooms", id);
+        const update = {}
+        update.chat = [...gameData.chat||[], {
+          name: isPlayerWhite ? playerWhite : playerBlack,
+          message: chatInp.current.value,
+          time: Date.now()
+        }]
+        await updateDoc(roomRef, update);
+        chatInp.current.value = ""
+      } catch (e) {
+        console.error("Error updating document: ", e);
+        throw e
+      }
+    }
+  }
+
   const restartRoom = async () => {
     try {
       const roomRef = doc(db, "rooms", id);
@@ -166,7 +190,8 @@ export default function Room(props) {
         history: [NEW_GAME],
         black: "",
         white: "",
-        undos: []
+        undos: [],
+        chat: []
       });
       window.location.reload()
     } catch (e) {
@@ -187,7 +212,6 @@ export default function Room(props) {
   }
 
   const undo = async () => {
-    console.log(gameData.history.length)
     if (confirm("Are you sure you want to undo?")) {
       if (gameData.history.length > 1) {
         try {
@@ -289,9 +313,7 @@ export default function Room(props) {
   }, [router])
 
   if (!gameState) return <></>
-
-  
-
+  console.log(gameData)
   return (
     <>
       <Head>
@@ -328,7 +350,26 @@ export default function Room(props) {
             </h1>
             <button onClick={copyRoomLink}>{copiedLink ? <FaCheck size={20}/> : <FaCopy size={20}/>}</button>
           </div>
-          {playerWhite !== playerBlack && <><button className={styles.switchBtn} onClick={switchPlayer}><FaUser size={12}/>Switch</button><br/></>}
+          
+
+          <div className={styles.undoContainer}>
+            <div className={styles.undoHeader}>
+            {playerWhite !== playerBlack && <button className={styles.switchBtn} onClick={switchPlayer}><FaUser size={12}/>Switch</button>}
+              <button onClick={undo} disabled={gameData.history.length === 1} className={styles.switchBtn}>{<FaUndo size={12}/>}Undo ({(gameData.undos||[]).length})</button>
+              <button className={styles.undoLogBtn} onClick={() => setShowUndoLog(curr => !curr)}>
+                {!showUndoLog ? <FaCaretLeft size={16}/> : <FaCaretDown size={16}/>}
+              </button>
+            </div>
+            {showUndoLog && <>
+              {(gameData.undos||[]).map(undo => {
+                let time = undo.time
+                let date = new Date(time)
+                return <p key={time}>{undo.name} used undo at {date.getHours()}:{date.getMinutes()}:{date.getSeconds()} on {date.getDate().toString().padStart(2, "0")}.{date.getMonth().toString().padStart(2, "0")}.{date.getFullYear()}</p>
+              })}
+              {(gameData.undos||[]).length === 0 && <p>No undos</p>}
+            </>}
+          </div>
+
         </div>
         <div className={styles.board} ref={boardRef}>
           {(!playerBlack || !playerWhite) && isPlayerWhite !== null && <div className={styles.waitingOverlay}>Waiting For Other Player</div>}
@@ -345,14 +386,23 @@ export default function Room(props) {
             gameState={gameState}
             updateGameState={updateGameState}/>
         </div>
-        <div className={styles.undoContainer}>
-          <button onClick={undo} disabled={gameData.history.length === 1} className={styles.switchBtn}>{<FaUndo size={12}/>}Undo</button>
-          {(gameData.undos||[]).map(undo => {
-            let time = undo.time
-            let date = new Date(time)
-            return <p key={time}>{undo.name} used undo at {date.getHours()}:{date.getMinutes()}:{date.getSeconds()} on {date.getDay().toString().padStart(2, "0")}.{date.getMonth().toString().padStart(2, "0")}.{date.getFullYear()}</p>
+
+        {playerWhite !== playerBlack && <div className={styles.chatContainer}>
+          <div className={styles.chatInputs}>
+            <input ref={chatInp} placeholder={`Message @${isPlayerWhite ? playerBlack : playerWhite}`}></input>
+            <button onClick={sendMessage}>Send</button>
+          </div>
+          {[...(gameData.chat||[])].reverse().map(message => {
+            const time = new Date(message.time)
+            return <div className={`${styles.msg} ${message.name === playerName && styles.fromSelf}`} key={message.time}>
+              <p>{message.message}</p>
+              <div className={styles.msgFooter}>
+                <p>{message.name}</p>
+                <p>{time.getDate().toString().padStart(2, "0")}.{time.getMonth().toString().padStart(2, "0")} | {time.getHours().toString().padStart(2, "0")}:{time.getMinutes().toString().padStart(2, "0")}</p>
+              </div>
+            </div>
           })}
-        </div>
+        </div>}
       </div>
     </>
   )
@@ -380,7 +430,8 @@ export async function getServerSideProps(context) {
         history: [NEW_GAME],
         black: "",
         white: "",
-        undos: []
+        undos: [],
+        chat: []
       }
       const docsRef = await addDoc(collection(db, "rooms"), data);
       id = docsRef.id
