@@ -127,7 +127,7 @@ export default function Room(props) {
         let options = getMoves(prevState, `${piece.x};${piece.y}`)
         for (let option of options) {
           let comparePiece = getPiece(newState, option[0], option[1])
-          if (comparePiece && comparePiece.type === piece.type) {
+          if (comparePiece && comparePiece.type === piece.type && comparePiece.white === piece.white) {
             setLastMove({ from: `${piece.x};${piece.y}`, to: `${comparePiece.x};${comparePiece.y}` })
           }
         }

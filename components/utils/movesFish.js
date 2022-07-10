@@ -10,7 +10,8 @@ export default function movesFish(gameState, piece) {
   let moves = []
   if (!getPiece(gameState, piece.x + 1, piece.y)) {
     moves.push([piece.x + 1, piece.y]);
-  } else if (!getPiece(gameState, piece.x - 1, piece.y)) {
+  }
+  if (!getPiece(gameState, piece.x - 1, piece.y)) {
     moves.push([piece.x - 1, piece.y]);
   }
 

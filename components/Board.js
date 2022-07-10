@@ -101,6 +101,10 @@ export default function Board({ isPlayerWhite, isBothPlayers, gameState, updateG
   }
 
   const onSelectTile = (tileId) => {
+    if(!tileId) {
+      setSelectedTileId(null)
+      return
+    }
     if (gameState.jailablePiece) {
       tryMoveToJail(tileId)
     } else {

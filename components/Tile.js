@@ -16,9 +16,59 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
   const isPlayerWhite = canMove === gameState.whitesTurn
 
   const tileMouseUp = (e) => {
-    selectTile(tileId)
-    e.stopPropagation()
+    setTimeout(() => {
+      if (!dragging) {
+        selectTile(tileId)
+      }
+    }, 0)
   }
+
+  const dragItem = useRef(null)
+  const [initialPos, setInitialPos] = useState([0, 0])
+  const [initiatedDrag, setInitiatedDrag] = useState(false)
+  const [dragging, setDragging] = useState(false)
+
+  const onMouseDown = (e) => {
+    if (!piece || (piece && (piece.white !== isPlayerWhite && piece.white !== null))) return
+    setInitiatedDrag(true)
+  }
+
+  function onMouseMove(e) {
+    if (dragging) {
+      e.preventDefault();
+      
+      let newPos = [e.clientX - initialPos[0], e.clientY - initialPos[1]]
+      dragItem.current.style.transform = "translate3d(" + newPos[0] + "px, " + newPos[1] + "px, 0)";
+    } else if (initiatedDrag) {
+      selectTile(tileId)
+      dragItem.current.classList.add(styles.dragging)
+      setInitialPos([e.clientX, e.clientY])
+      setDragging(true)
+    }
+  }
+
+  const onMouseUp = () => {
+    setInitiatedDrag(false)
+  }
+  
+  const onDragEnd = () => {
+    if (dragging) {
+      dragItem.current.classList.remove(styles.dragging)
+      dragItem.current.style.transform = "unset"
+      setInitiatedDrag(false)
+      setDragging(false)
+      selectTile(null)
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onDragEnd)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onDragEnd)
+    }
+  }, [dragging, initialPos, initiatedDrag])
 
   useEffect(() => {
     const newPiece = getPiece(gameState, x, y)
@@ -89,6 +139,10 @@ export default function Tile({ x, y, canMove, possibleMoves, gameState, selectTi
         ${isToTile && styles.moveTo}
       `}>
       <div className={`${styles.piece}`}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        ref={dragItem}
         style={{ cursor: (canSelectTile || isJailAndJailable || isTilePossibleMove || isTilePossibleTarget) ? 'pointer' : 'default' }}
       >
         {piece && <Image
