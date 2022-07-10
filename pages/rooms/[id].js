@@ -412,7 +412,7 @@ export default function Room(props) {
 
         {playerWhite !== playerBlack && <div className={styles.chatContainer}>
           <div className={styles.chatInputs}>
-            <input ref={chatInp} placeholder={`Message @${isPlayerWhite ? playerBlack : playerWhite}`}></input>
+            <input ref={chatInp} placeholder={`Message @${isPlayerWhite ? playerBlack : playerWhite}`} onKeyUp={(e) => {e.key === "Enter" && sendMessage()}}></input>
             <button onClick={sendMessage}>Send</button>
           </div>
           {[...(gameData.chat||[])].reverse().map(message => {
